@@ -1,12 +1,21 @@
 package com.example.mike.ftc3;
 
+import android.content.Intent;
 import android.support.v7.app.ActionBarActivity;
 import android.os.Bundle;
 import android.view.Menu;
 import android.view.MenuItem;
+import android.view.View;
 
 
 public class MainActivity extends ActionBarActivity {
+
+    /** Called when the user clicks the wifi scan button */
+    public void displayWifiScan(View view) {
+        // Do something in response to button
+        Intent intent = new Intent(this, DisplayWifiScan.class);
+        startActivity(intent);
+    }
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
