@@ -6,5 +6,6 @@
     <string name="title_activity_display_wifi_scan">Wifi Scan</string>
     <string name="button_wifi_scan">Scan for WIFI networks</string>
     <string name="button_re_scan">Rescan for WIFI networks</string>
+    <string name="action_search">Scan</string>
 
 </resources>

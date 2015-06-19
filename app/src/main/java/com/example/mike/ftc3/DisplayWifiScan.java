@@ -42,6 +42,21 @@ public class DisplayWifiScan extends ActionBarActivity implements View.OnClickLi
     ArrayList<HashMap<String, String>> arraylist = new ArrayList<HashMap<String, String>>();
     SimpleAdapter adapter;
 
+    private final BroadcastReceiver myReceiver = new BroadcastReceiver() {
+        @Override
+        public void onReceive(Context c, Intent intent) {
+            results = wifi.getScanResults();
+            Collections.sort(results, new Comparator<ScanResult>() {
+                @Override
+                public int compare(final ScanResult object1, final ScanResult object2) {
+                    return (object1.level - object2.level); // sort descending order
+                }
+            });
+            size = results.size();
+            displayScan();
+        }
+    };
+
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
@@ -58,23 +73,11 @@ public class DisplayWifiScan extends ActionBarActivity implements View.OnClickLi
             Toast.makeText(getApplicationContext(), "wifi is disabled..making it enabled", Toast.LENGTH_LONG).show();
             wifi.setWifiEnabled(true);
         }
-        //this.adapter = new SimpleAdapter(DisplayWifiScan.this, arraylist, R.layout.row, new String[] { ITEM_KEY }, new int[] { R.id.list_value });
+
         this.adapter = new SimpleAdapter(DisplayWifiScan.this, arraylist, R.layout.row, from, to);
         lv.setAdapter(this.adapter);
 
-        registerReceiver(new BroadcastReceiver() {
-            @Override
-            public void onReceive(Context c, Intent intent) {
-                results = wifi.getScanResults();
-                Collections.sort(results, new Comparator<ScanResult>() {
-                    @Override
-                    public int compare(final ScanResult object1, final ScanResult object2) {
-                        return ( object1.level - object2.level); // sort descending order
-                    }
-                });
-                size = results.size();
-            }
-        }, new IntentFilter(WifiManager.SCAN_RESULTS_AVAILABLE_ACTION));
+        registerReceiver(myReceiver, new IntentFilter(WifiManager.SCAN_RESULTS_AVAILABLE_ACTION));
 
         // start with initial scan
         wifiScan();
@@ -92,9 +95,12 @@ public class DisplayWifiScan extends ActionBarActivity implements View.OnClickLi
 
     public void wifiScan()
     {
-        arraylist.clear();
         wifi.startScan();
+    }
 
+    public void displayScan()
+    {
+        arraylist.clear();
         Toast.makeText(this, "Wifi network(s) found = " + size, Toast.LENGTH_SHORT).show();
         try
         {
@@ -118,6 +124,7 @@ public class DisplayWifiScan extends ActionBarActivity implements View.OnClickLi
                 item.put("frequency", Integer.toString(results.get(size).frequency));
                 item.put("channel", Integer.toString(convertFrequencyToChannel(results.get(size).frequency)));
                 item.put("strength", Integer.toString(WifiManager.calculateSignalLevel(results.get(size).level, 5)));
+                //item.put("strength", Integer.toString(results.get(size).level));
                 arraylist.add(item);
 
                 size--;
@@ -133,12 +140,12 @@ public class DisplayWifiScan extends ActionBarActivity implements View.OnClickLi
         wifiScan();
     }
 
-//    @Override
-//    public boolean onCreateOptionsMenu(Menu menu) {
-//        // Inflate the menu; this adds items to the action bar if it is present.
-//        getMenuInflater().inflate(R.menu.menu_display_wifi_scan, menu);
-//        return true;
-//    }
+    @Override
+    public boolean onCreateOptionsMenu(Menu menu) {
+        // Inflate the menu; this adds items to the action bar if it is present.
+        getMenuInflater().inflate(R.menu.menu_display_wifi_scan, menu);
+        return true;
+    }
 
     @Override
     public boolean onOptionsItemSelected(MenuItem item) {
@@ -150,8 +157,16 @@ public class DisplayWifiScan extends ActionBarActivity implements View.OnClickLi
         //noinspection SimplifiableIfStatement
         if (id == R.id.action_settings) {
             return true;
+        } else if (id == R.id.action_search){
+            wifiScan();
         }
 
         return super.onOptionsItemSelected(item);
+    }
+
+    @Override
+    public void onDestroy() {
+        super.onDestroy();
+        unregisterReceiver(myReceiver);
     }
 }
