@@ -1,11 +1,12 @@
 <resources>
-    <string name="app_name">FTC3</string>
-
+    <string name="app_name">3491 Scanner</string>
     <string name="main_header">select one of the following buttons</string>
     <string name="action_settings">Settings</string>
     <string name="title_activity_display_wifi_scan">Wifi Scan</string>
     <string name="button_wifi_scan">Scan for WIFI networks</string>
     <string name="button_re_scan">Rescan for WIFI networks</string>
     <string name="action_search">Scan</string>
+    <string name="button_channel_scan">Wifi Channel Scan</string>
+    <string name="title_activity_display_channel_scan">Channel Scan</string>
 
 </resources>

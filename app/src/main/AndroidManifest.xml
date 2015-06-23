@@ -30,6 +30,14 @@
                 android:name="android.support.PARENT_ACTIVITY"
                 android:value="com.example.mike.ftc3.MainActivity" />
         </activity>
+        <activity
+            android:name=".DisplayChannelScan"
+            android:label="@string/title_activity_display_channel_scan"
+            android:parentActivityName=".MainActivity" >
+            <meta-data
+                android:name="android.support.PARENT_ACTIVITY"
+                android:value="com.example.mike.ftc3.MainActivity" />
+        </activity>
     </application>
 
 </manifest>

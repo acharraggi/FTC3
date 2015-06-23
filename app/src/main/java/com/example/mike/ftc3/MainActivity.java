@@ -17,6 +17,13 @@ public class MainActivity extends ActionBarActivity {
         startActivity(intent);
     }
 
+    /** Called when the user clicks the chanel scan button */
+    public void displayChannelScan(View view) {
+        // Do something in response to button
+        Intent intent = new Intent(this, DisplayChannelScan.class);
+        startActivity(intent);
+    }
+
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
