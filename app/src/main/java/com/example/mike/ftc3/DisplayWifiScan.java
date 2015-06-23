@@ -6,8 +6,9 @@ import android.content.Intent;
 import android.content.IntentFilter;
 import android.net.wifi.ScanResult;
 import android.net.wifi.WifiManager;
-import android.support.v7.app.ActionBarActivity;
+//import android.support.v7.app.ActionBarActivity;
 import android.os.Bundle;
+import android.support.v7.app.AppCompatActivity;
 import android.util.Log;
 import android.view.Menu;
 import android.view.MenuItem;
@@ -26,7 +27,7 @@ import java.util.List;
 
 // make list fancier: http://eureka.ykyuen.info/2010/01/03/android-simple-listview-using-simpleadapter/
 
-public class DisplayWifiScan extends ActionBarActivity implements View.OnClickListener {
+public class DisplayWifiScan extends AppCompatActivity implements View.OnClickListener {
     WifiManager wifi;
     ListView lv;
     TextView textStatus;

@@ -12,8 +12,9 @@ import android.graphics.RectF;
 import android.graphics.drawable.BitmapDrawable;
 import android.net.wifi.ScanResult;
 import android.net.wifi.WifiManager;
-import android.support.v7.app.ActionBarActivity;
+//import android.support.v7.app.ActionBarActivity;
 import android.os.Bundle;
+import android.support.v7.app.AppCompatActivity;
 import android.util.Log;
 import android.view.Menu;
 import android.view.MenuItem;
@@ -25,13 +26,15 @@ import java.util.Collections;
 import java.util.Comparator;
 import java.util.List;
 
-public class DisplayChannelScan extends ActionBarActivity {
+public class DisplayChannelScan extends AppCompatActivity {
     WifiManager wifi;
     List<ScanResult> results;
 
     private final BroadcastReceiver myReceiver = new BroadcastReceiver() {
         @Override
         public void onReceive(Context c, Intent intent) {
+            //Log.i("DisplayChannelScan", "onReceive called");
+            // this is called initially, and as networks are dropped or added
             results = wifi.getScanResults();
             Collections.sort(results, new Comparator<ScanResult>() {
                 @Override
@@ -39,8 +42,7 @@ public class DisplayChannelScan extends ActionBarActivity {
                     return (object2.level - object1.level); // sort ascending order
                 }
             });
-            //displayScan();
-            llDraw();
+            llDraw();  // redraw the network graphic
         }
     };
 
@@ -60,15 +62,14 @@ public class DisplayChannelScan extends ActionBarActivity {
         ll.getViewTreeObserver().addOnGlobalLayoutListener(new ViewTreeObserver.OnGlobalLayoutListener() {
             @Override
             public void onGlobalLayout() {
+                // Android must layout the screen before you can get it's size so we set up this callback.
                 if (!mMeasured) {
-                    // Here your view is already layed out and measured for the first time
+                    // Here your view is already laid out and measured for the first time
                     mMeasured = true; // Some optional flag to mark, that we already got the sizes
                     llWidth = ll.getWidth();
                     Log.i("DisplayChannelScan", "llWidth = " + llWidth);
                     llHeight = ll.getHeight();
                     Log.i("DisplayChannelScan", "llHeight = " + llHeight);
-                    //llDraw();
-                    //ll.invalidate();
                 }
             }
         });
@@ -91,6 +92,7 @@ public class DisplayChannelScan extends ActionBarActivity {
     }
 
     private void llDraw() {
+        // draws on a canvas and then sets the background to be that canvas.
         Paint paint = new Paint();
 
         Bitmap bg = Bitmap.createBitmap(llWidth, llHeight, Bitmap.Config.ARGB_8888);
@@ -103,42 +105,39 @@ public class DisplayChannelScan extends ActionBarActivity {
 
         int tickSize = llHeight/18;
         for(int i = 1; i<18; i++) {
-            paint.setColor(Color.parseColor("#FFFFFF"));   //white
-            canvas.drawLine(18, i * tickSize, 25, i * tickSize, paint);
+            canvas.drawLine(18, i * tickSize, 25, i * tickSize, paint); // draw tick marks
             if(i>2 && i<16) {
-                canvas.drawText(String.valueOf(i - 2), 0, i * tickSize + 4, paint);
-//                paint.setColor(Color.parseColor("#A0FF0000"));   //red
-//                canvas.drawText("network name",205,i*tickSize+4, paint);
+                canvas.drawText(String.valueOf(i - 2), 0, i * tickSize + 4, paint);  // add channel numbers beside tick marks
             }
         }
 
         for(ScanResult r: results) {
             int channel = convertFrequencyToChannel(r.frequency);
             int signalLevel = WifiManager.calculateSignalLevel(r.level, 5);
-            if (channel > 0 && signalLevel > 0) {
+            if (channel > 0 && signalLevel > 0) {  // ignore unexpected Wifi frequencies, and weak signals.
                 int tick = channel+2;
                 int strength = convertLevelToStrength(r.level)*llWidth/100;
 
-                switch (signalLevel){
-                    case 5: paint.setColor(Color.parseColor("#2080FFFF"));
+                switch (signalLevel){ // adjust transparency(alpha channel) so stronger networks are more transparent
+                    case 5: paint.setColor(Color.parseColor("#1080FFFF")); // light blue colour
                             break;
-                    case 4: paint.setColor(Color.parseColor("#4080FFFF"));
+                    case 4: paint.setColor(Color.parseColor("#2080FFFF"));
                         break;
-                    case 3: paint.setColor(Color.parseColor("#6080FFFF"));
+                    case 3: paint.setColor(Color.parseColor("#4080FFFF"));
                         break;
-                    case 2: paint.setColor(Color.parseColor("#8080FFFF"));
+                    case 2: paint.setColor(Color.parseColor("#6080FFFF"));
                         break;
-                    case 1: paint.setColor(Color.parseColor("#A080FFFF"));
+                    case 1: paint.setColor(Color.parseColor("#8080FFFF"));
                         break;
                     default: paint.setColor(Color.parseColor("#A080FFFF"));
                         break;
                 }
-                canvas.translate((-strength / 2) + 30, 0);
-                canvas.drawArc(new RectF(0, tickSize * (tick - 2), strength, tickSize * (tick + 2)), 270, 180, true, paint);
-                canvas.translate(strength / 2 - 30, 0);
+                canvas.translate((-strength / 2) + 30, 0);  // shift where we draw half oval so it lines up beside the tick marks.
+                canvas.drawArc(new RectF(0, tickSize * (tick - 2), strength, tickSize * (tick + 2)), 270, 180, true, paint); // draw half an oval
+                canvas.translate(strength / 2 - 30, 0);     // undo shift
 
                 paint.setColor(Color.parseColor("#A080FFFF"));
-                canvas.drawText(r.SSID, strength, tick * tickSize + 4, paint);
+                canvas.drawText(r.SSID, strength, tick * tickSize + 4, paint);  // write network name beside oval
             }
         }
 
@@ -208,8 +207,8 @@ public class DisplayChannelScan extends ActionBarActivity {
 //            canvas.drawRect(i*20, 500+i*20, 100+i*20, 600+i*20, paint);
 //        }
 
-        ll.setBackground(new BitmapDrawable(getResources(), bg));
-        ll.invalidate();
+        ll.setBackground(new BitmapDrawable(getResources(), bg)); // set graphic as background
+        ll.invalidate();   // force layout redraw
     }
 
     @Override
@@ -237,10 +236,11 @@ public class DisplayChannelScan extends ActionBarActivity {
     @Override
     public void onDestroy() {
         super.onDestroy();
-        unregisterReceiver(myReceiver);
+        unregisterReceiver(myReceiver);  // unregister the Wifi receiver
     }
 
     private static int convertFrequencyToChannel(int freq) {
+        // convert standard Wifi frequencies to Wifi channel numbers.
         if (freq >= 2412 && freq <= 2484) {
             return (freq - 2412) / 5 + 1;
         } else if (freq >= 5170 && freq <= 5825) {
@@ -251,8 +251,8 @@ public class DisplayChannelScan extends ActionBarActivity {
     }
 
     private static int convertLevelToStrength(int level) {
-        int r;
         // convert wifi level to a number between 0-100, likely values 5-50
+        int r;
         if (level < -100) {
             r = 0;
         }
@@ -261,7 +261,7 @@ public class DisplayChannelScan extends ActionBarActivity {
         }
         else r = 100+level;
 
-        Log.d("DisplayChannelScan","Level = "+ level + ", r =" +r);
+        //Log.d("DisplayChannelScan","Level = "+ level + ", r =" +r);
         return(r);
     }
 }
