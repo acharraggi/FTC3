@@ -26,20 +26,20 @@ import java.util.Collections;
 import java.util.Comparator;
 import java.util.List;
 
-public class DisplayChannelScan extends AppCompatActivity {
+public class DisplayChannelScan2 extends AppCompatActivity {
     WifiManager wifi;
     List<ScanResult> results;
 
     private final BroadcastReceiver myReceiver = new BroadcastReceiver() {
         @Override
         public void onReceive(Context c, Intent intent) {
-            //Log.i("DisplayChannelScan", "onReceive called");
+            //Log.i("DisplayChannelScan2", "onReceive called");
             // this is called initially, and as networks are dropped or added
             results = wifi.getScanResults();
             Collections.sort(results, new Comparator<ScanResult>() {
                 @Override
                 public int compare(final ScanResult object1, final ScanResult object2) {
-                    return (object2.level - object1.level); // sort ascending order
+                    return (object2.level - object1.level);
                 }
             });
             llDraw();  // redraw the network graphic
@@ -53,7 +53,7 @@ public class DisplayChannelScan extends AppCompatActivity {
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
-        Log.i("DisplayChannelScan", "onCreate called");
+        Log.i("DisplayChannelScan2", "onCreate called");
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_display_channel_scan);
 
@@ -67,9 +67,9 @@ public class DisplayChannelScan extends AppCompatActivity {
                     // Here your view is already laid out and measured for the first time
                     mMeasured = true; // Some optional flag to mark, that we already got the sizes
                     llWidth = ll.getWidth();
-                    Log.i("DisplayChannelScan", "llWidth = " + llWidth);
+                    Log.i("DisplayChannelScan2", "llWidth = " + llWidth);
                     llHeight = ll.getHeight();
-                    Log.i("DisplayChannelScan", "llHeight = " + llHeight);
+                    Log.i("DisplayChannelScan2", "llHeight = " + llHeight);
                 }
             }
         });
@@ -111,99 +111,44 @@ public class DisplayChannelScan extends AppCompatActivity {
             }
         }
 
+        int channelSize[] = new int[] {0,0,0,0,0,0,0,0,0,0,0,0,0,0}; // declare size 14
+        String channelNames[] = new String[] {"","","","","","","","","","","","","",""};
+
         for(ScanResult r: results) {
             int channel = convertFrequencyToChannel(r.frequency);
             int signalLevel = WifiManager.calculateSignalLevel(r.level, 5); // returns 0 to 4
-            if (channel > 0 && signalLevel > 0) {  // ignore unexpected Wifi frequencies, and weak signals.
-                int tick = channel+2;
-                int strength = convertLevelToStrength(r.level)*llWidth/100;
 
-                switch (signalLevel){ // adjust transparency(alpha channel) so stronger networks are more transparent
-                    case 4: paint.setColor(Color.parseColor("#2080FFFF")); // light blue colour
+            if (channel > 0 && channel < 14 && signalLevel > 0) {  // ignore unexpected Wifi frequencies, and weak signals.
+                int tick = channel+2;
+               // int strength = convertLevelToStrength(r.level)*llWidth/100;
+                int strength = convertLevelToStrength(r.level)*3;
+                //Log.i("DisplayChannelScan2","level = "+r.level+", signalLevel = "+signalLevel+", strength = "+strength);
+
+                switch (signalLevel){
+                    case 4: paint.setColor(Color.parseColor("#60FF0000")); //red
                         break;
-                    case 3: paint.setColor(Color.parseColor("#4080FFFF"));
+                    case 3: paint.setColor(Color.parseColor("#60FF00FF"));  //purple
                         break;
-                    case 2: paint.setColor(Color.parseColor("#6080FFFF"));
+                    case 2: paint.setColor(Color.parseColor("#60FFFF00"));  //l.yellow
                         break;
-                    case 1: paint.setColor(Color.parseColor("#8080FFFF"));
+                    case 1: paint.setColor(Color.parseColor("#6000FF00"));  //green
                         break;
-                    default: paint.setColor(Color.parseColor("#A080FFFF"));
+                    default: paint.setColor(Color.parseColor("#60303030"));  //light grey
                         break;
                 }
-                canvas.translate((-strength / 2) + 30, 0);  // shift where we draw half oval so it lines up beside the tick marks.
-                canvas.drawArc(new RectF(0, tickSize * (tick - 2), strength, tickSize * (tick + 2)), 270, 180, true, paint); // draw half an oval
-                canvas.translate(strength / 2 - 30, 0);     // undo shift
+                //canvas.drawRect(30 + channelSize[channel], tickSize * (tick - 2), 30 + strength + channelSize[channel], tickSize * (tick + 2), paint);
+                canvas.drawRoundRect(new RectF(30 + channelSize[channel], tickSize * (tick - 2), 30 + strength + channelSize[channel], tickSize * (tick + 2)), 15, 15, paint);
 
-                paint.setColor(Color.parseColor("#A080FFFF"));
-                canvas.drawText(r.SSID, strength, tick * tickSize + 4, paint);  // write network name beside oval
+                //paint.setColor(Color.parseColor("#80202020"));  //  white
+                //canvas.drawText(r.SSID, 30 + channelSize[channel], tick * tickSize + 4, paint);  // write network name in box
+                channelSize[channel] = channelSize[channel] + strength;
+                channelNames[channel] = channelNames[channel] + r.SSID + " ";
             }
         }
-
-//        paint.setColor(Color.parseColor("#A0FF0000"));  //red
-//        canvas.drawRect(30, tickSize, 200, tickSize*5, paint);
-//
-//        canvas.translate(-50,0);
-//        canvas.drawArc(new RectF(30,tickSize*10,100,tickSize*14),270,180,true,paint);
-//        canvas.translate(50,0);
-
-//        paint.setColor(Color.parseColor("#20FF0000"));  //red
-//        canvas.drawRect(0, 0, 100, 100, paint);
-//        canvas.drawRect(20, 20, 120, 120, paint);
-//        canvas.drawRect(40, 40, 140, 140, paint);
-//        canvas.drawRect(60, 60, 160, 160, paint);
-//        canvas.drawRect(80, 80, 180, 180, paint);
-
-//        paint.setColor(Color.parseColor("#FFFF0000"));  //red
-//        canvas.drawText("hello",200,200,paint);
-
-//        paint.setColor(Color.parseColor("#AAFFFF80"));  // LIGHT YELLOW
-//        for(int i = 0; i<5; i++) {
-//            canvas.drawRect(200+i*20, i*20, 300+i*20, 100+i*20, paint);
-//        }
-//
-//        paint.setColor(Color.parseColor("#A080FFFF"));  // LIGHT BLUE
-//        for(int i = 0; i<5; i++) {
-//            canvas.drawRect(200+i*20, 100+i*20, 300+i*20, 200+i*20, paint);
-//        }
-//
-//        paint.setColor(Color.parseColor("#A0FF80FF"));  // LIGHT PURPLE
-//        for(int i = 0; i<5; i++) {
-//            canvas.drawRect(200+i*20, 200+i*20, 300+i*20, 300+i*20, paint);
-//        }
-//        paint.setColor(Color.parseColor("#A0FF8080"));  // light red
-//        for(int i = 0; i<5; i++) {
-//            canvas.drawRect(200+i*20, 300+i*20, 300+i*20, 400+i*20, paint);
-//        }
-//        paint.setColor(Color.parseColor("#A08080FF"));  // medium blue
-//        for(int i = 0; i<5; i++) {
-//            canvas.drawRect(200+i*20, 400+i*20, 300+i*20, 500+i*20, paint);
-//        }
-//
-//        paint.setColor(Color.parseColor("#A080FF80"));  // light green
-//        for(int i = 0; i<5; i++) {
-//            canvas.drawRect(200+i*20, 500+i*20, 300+i*20, 600+i*20, paint);
-//        }
-//
-//        paint.setColor(Color.parseColor("#200FF000"));  //blue
-//        for(int i = 0; i<5; i++) {
-//            canvas.drawRect(i*20, 100+i*20, 100+i*20, 200+i*20, paint);
-//        }
-//        paint.setColor(Color.parseColor("#200000FF")); //green
-//        for(int i = 0; i<5; i++) {
-//            canvas.drawRect(i*20, 200+i*20, 100+i*20, 300+i*20, paint);
-//        }
-//        paint.setColor(Color.parseColor("#2000FFFF"));  // cyan
-//        for(int i = 0; i<5; i++) {
-//            canvas.drawRect(i*20, 300+i*20, 100+i*20, 400+i*20, paint);
-//        }
-//        paint.setColor(Color.parseColor("#20FF00FF"));  // magenta
-//        for(int i = 0; i<5; i++) {
-//            canvas.drawRect(i*20, 400+i*20, 100+i*20, 500+i*20, paint);
-//        }
-//        paint.setColor(Color.parseColor("#20FFFF00"));  // yellow
-//        for(int i = 0; i<5; i++) {
-//            canvas.drawRect(i*20, 500+i*20, 100+i*20, 600+i*20, paint);
-//        }
+        paint.setColor(Color.parseColor("white"));
+        for(int i = 1; i<13; i++) {
+            canvas.drawText(channelNames[i], 30 , (i+2) * tickSize + 4, paint);  // write network names found in each channel
+        }
 
         ll.setBackground(new BitmapDrawable(getResources(), bg)); // set graphic as background
         ll.invalidate();   // force layout redraw
@@ -212,7 +157,7 @@ public class DisplayChannelScan extends AppCompatActivity {
     @Override
     public boolean onCreateOptionsMenu(Menu menu) {
         // Inflate the menu; this adds items to the action bar if it is present.
-        getMenuInflater().inflate(R.menu.menu_display_channel_scan, menu);
+        getMenuInflater().inflate(R.menu.menu_display_channel_scan2, menu);
         return true;
     }
 
@@ -238,11 +183,11 @@ public class DisplayChannelScan extends AppCompatActivity {
     }
 
     private static int convertFrequencyToChannel(int freq) {
-        // convert standard Wifi frequencies to Wifi channel numbers.
+        // convert standard Wifi frequencies to Wifi channel numbers. 1-13
         if (freq >= 2412 && freq <= 2484) {
             return (freq - 2412) / 5 + 1;
-        } else if (freq >= 5170 && freq <= 5825) {
-            return (freq - 5170) / 5 + 34;
+  //      } else if (freq >= 5170 && freq <= 5825) {
+  //          return (freq - 5170) / 5 + 34;
         } else {
             return -1;
         }
@@ -259,7 +204,7 @@ public class DisplayChannelScan extends AppCompatActivity {
         }
         else r = 100+level;
 
-        //Log.d("DisplayChannelScan","Level = "+ level + ", r =" +r);
+        //Log.d("DisplayChannelScan2","Level = "+ level + ", r =" +r);
         return(r);
     }
 }

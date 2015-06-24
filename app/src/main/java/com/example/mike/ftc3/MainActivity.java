@@ -18,10 +18,17 @@ public class MainActivity extends AppCompatActivity {
         startActivity(intent);
     }
 
-    /** Called when the user clicks the chanel scan button */
+    /** Called when the user clicks the channel scan button */
     public void displayChannelScan(View view) {
         // Do something in response to button
         Intent intent = new Intent(this, DisplayChannelScan.class);
+        startActivity(intent);
+    }
+
+    /** Called when the user clicks the channel scan2 button */
+    public void displayChannelScan2(View view) {
+        // Do something in response to button
+        Intent intent = new Intent(this, DisplayChannelScan2.class);
         startActivity(intent);
     }
 

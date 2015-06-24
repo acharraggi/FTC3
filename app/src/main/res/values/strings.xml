@@ -6,7 +6,8 @@
     <string name="button_wifi_scan">Scan for WIFI networks</string>
     <string name="button_re_scan">Rescan for WIFI networks</string>
     <string name="action_search">Scan</string>
-    <string name="button_channel_scan">Wifi Channel Scan</string>
+    <string name="button_channel_scan">Channel Scan (ovals)</string>
     <string name="title_activity_display_channel_scan">Channel Scan</string>
-
+    <string name="title_activity_display_channel_scan2">Channel Scan2</string>
+    <string name="button_channel_scan2">Channel Scan (boxes)</string>
 </resources>
