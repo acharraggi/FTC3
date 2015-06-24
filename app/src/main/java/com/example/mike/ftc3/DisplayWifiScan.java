@@ -9,14 +9,14 @@ import android.net.wifi.WifiManager;
 //import android.support.v7.app.ActionBarActivity;
 import android.os.Bundle;
 import android.support.v7.app.AppCompatActivity;
-import android.util.Log;
+//import android.util.Log;
 import android.view.Menu;
 import android.view.MenuItem;
 import android.view.View;
 import android.widget.Button;
 import android.widget.ListView;
 import android.widget.SimpleAdapter;
-import android.widget.TextView;
+//import android.widget.TextView;
 import android.widget.Toast;
 
 import java.util.ArrayList;
@@ -28,20 +28,17 @@ import java.util.List;
 // make list fancier: http://eureka.ykyuen.info/2010/01/03/android-simple-listview-using-simpleadapter/
 
 public class DisplayWifiScan extends AppCompatActivity implements View.OnClickListener {
-    WifiManager wifi;
-    ListView lv;
-    TextView textStatus;
-    Button buttonScan;
-    int size = 0;
-    List<ScanResult> results;
+    private WifiManager wifi;
+    private int size = 0;
+    private List<ScanResult> results;
 
     //String ITEM_KEY = "key";
     // create the grid item mapping
-    String[] from = new String[] {"SSID", "frequency", "channel", "strength"};
-    int[] to = new int[] { R.id.SSID, R.id.frequency, R.id.channel, R.id.strength };
+    private final String[] from = new String[] {"SSID", "frequency", "channel", "strength"};
+    private final int[] to = new int[] { R.id.SSID, R.id.frequency, R.id.channel, R.id.strength };
 
-    ArrayList<HashMap<String, String>> arraylist = new ArrayList<HashMap<String, String>>();
-    SimpleAdapter adapter;
+    private final ArrayList<HashMap<String, String>> arraylist = new ArrayList<HashMap<String, String>>();
+    private SimpleAdapter adapter;
 
     private final BroadcastReceiver myReceiver = new BroadcastReceiver() {
         @Override
@@ -50,7 +47,8 @@ public class DisplayWifiScan extends AppCompatActivity implements View.OnClickLi
             Collections.sort(results, new Comparator<ScanResult>() {
                 @Override
                 public int compare(final ScanResult object1, final ScanResult object2) {
-                    return (object1.level - object2.level); // sort descending order
+                // sort ascending channel#, descending strength
+                return ((object2.frequency*1000-object2.level) - (object1.frequency*1000-object1.level));
                 }
             });
             size = results.size();
@@ -63,13 +61,13 @@ public class DisplayWifiScan extends AppCompatActivity implements View.OnClickLi
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_display_wifi_scan);
 
-        textStatus = (TextView) findViewById(R.id.textStatus);
-        buttonScan = (Button) findViewById(R.id.buttonReScan);
+        //TextView textStatus = (TextView) findViewById(R.id.textStatus);
+        Button buttonScan = (Button) findViewById(R.id.buttonReScan);
         buttonScan.setOnClickListener(this);
-        lv = (ListView)findViewById(R.id.list);
+        ListView lv = (ListView)findViewById(R.id.list);
 
         wifi = (WifiManager) getSystemService(Context.WIFI_SERVICE);
-        if (wifi.isWifiEnabled() == false)
+        if (!wifi.isWifiEnabled())
         {
             Toast.makeText(getApplicationContext(), "wifi is disabled..making it enabled", Toast.LENGTH_LONG).show();
             wifi.setWifiEnabled(true);
@@ -94,46 +92,42 @@ public class DisplayWifiScan extends AppCompatActivity implements View.OnClickLi
         }
     }
 
-    public void wifiScan()
+    private void wifiScan()
     {
         wifi.startScan();
     }
 
-    public void displayScan()
+    private void displayScan()
     {
         arraylist.clear();
         Toast.makeText(this, "Wifi network(s) found = " + size, Toast.LENGTH_SHORT).show();
-        try
-        {
-            // add column headers
-            {
-                HashMap<String, String> item = new HashMap<String, String>();
-                item.put("SSID", "SSID");
-                item.put("frequency", "Freq.");
-                item.put("channel", "Channel");
-                item.put("strength", "Strength");
-                arraylist.add(item);
-                adapter.notifyDataSetChanged();
-            }
 
-            size = size - 1;
-            while (size >= 0)
-            {
-                HashMap<String, String> item = new HashMap<String, String>();
-                //item.put(ITEM_KEY, results.get(size).SSID + ",   Frequency: " + results.get(size).frequency + ",   Channel: "+ convertFrequencyToChannel(results.get(size).frequency) + ",   Strength: " + WifiManager.calculateSignalLevel(results.get(size).level,5));
-                item.put("SSID", results.get(size).SSID);
-                item.put("frequency", Integer.toString(results.get(size).frequency));
-                item.put("channel", Integer.toString(convertFrequencyToChannel(results.get(size).frequency)));
-                item.put("strength", Integer.toString(WifiManager.calculateSignalLevel(results.get(size).level, 5)));
-                //item.put("strength", Integer.toString(results.get(size).level));
-                arraylist.add(item);
-
-                size--;
-                adapter.notifyDataSetChanged();
-            }
+        // add column headers
+        { // add block so item can be reused in while loop later
+            HashMap<String, String> item = new HashMap<String, String>();
+            item.put("SSID", "SSID");
+            item.put("frequency", "Freq.");
+            item.put("channel", "Channel");
+            item.put("strength", "Strength");
+            arraylist.add(item);
+            adapter.notifyDataSetChanged();
         }
-        catch (Exception e)
-        { }
+
+        size = size - 1;
+        while (size >= 0)
+        {
+            HashMap<String, String> item = new HashMap<String, String>();
+            //item.put(ITEM_KEY, results.get(size).SSID + ",   Frequency: " + results.get(size).frequency + ",   Channel: "+ convertFrequencyToChannel(results.get(size).frequency) + ",   Strength: " + WifiManager.calculateSignalLevel(results.get(size).level,5));
+            item.put("SSID", results.get(size).SSID);
+            item.put("frequency", Integer.toString(results.get(size).frequency));
+            item.put("channel", Integer.toString(convertFrequencyToChannel(results.get(size).frequency)));
+            item.put("strength", Integer.toString(WifiManager.calculateSignalLevel(results.get(size).level, 5)));
+            //item.put("strength", Integer.toString(results.get(size).level));
+            arraylist.add(item);
+
+            size--;
+            adapter.notifyDataSetChanged();
+        }
     }
 
     public void onClick(View view)

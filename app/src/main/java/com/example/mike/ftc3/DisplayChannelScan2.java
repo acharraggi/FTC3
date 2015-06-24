@@ -27,8 +27,8 @@ import java.util.Comparator;
 import java.util.List;
 
 public class DisplayChannelScan2 extends AppCompatActivity {
-    WifiManager wifi;
-    List<ScanResult> results;
+    private WifiManager wifi;
+    private List<ScanResult> results;
 
     private final BroadcastReceiver myReceiver = new BroadcastReceiver() {
         @Override
@@ -46,18 +46,18 @@ public class DisplayChannelScan2 extends AppCompatActivity {
         }
     };
 
-    boolean mMeasured = false;
-    int llWidth = 0;
-    int llHeight = 0;
-    LinearLayout ll;
+    private boolean mMeasured = false;
+    private int llWidth = 0;
+    private int llHeight = 0;
+    private LinearLayout ll;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         Log.i("DisplayChannelScan2", "onCreate called");
         super.onCreate(savedInstanceState);
-        setContentView(R.layout.activity_display_channel_scan);
+        setContentView(R.layout.activity_display_channel_scan2);
 
-        ll = (LinearLayout) findViewById(R.id.channel_scan);
+        ll = (LinearLayout) findViewById(R.id.channel_scan2);
 
         ll.getViewTreeObserver().addOnGlobalLayoutListener(new ViewTreeObserver.OnGlobalLayoutListener() {
             @Override
@@ -75,7 +75,7 @@ public class DisplayChannelScan2 extends AppCompatActivity {
         });
 
         wifi = (WifiManager) getSystemService(Context.WIFI_SERVICE);
-        if (wifi.isWifiEnabled() == false)
+        if (!wifi.isWifiEnabled())
         {
             Toast.makeText(getApplicationContext(), "wifi is disabled..making it enabled", Toast.LENGTH_LONG).show();
             wifi.setWifiEnabled(true);
@@ -86,7 +86,7 @@ public class DisplayChannelScan2 extends AppCompatActivity {
 
     }
 
-    public void wifiScan()
+    private void wifiScan()
     {
         wifi.startScan();
     }
@@ -98,10 +98,10 @@ public class DisplayChannelScan2 extends AppCompatActivity {
         Bitmap bg = Bitmap.createBitmap(llWidth, llHeight, Bitmap.Config.ARGB_8888);
         Canvas canvas = new Canvas(bg);
 
-        paint.setColor(Color.parseColor("#000000"));   //black
+        paint.setColor(Color.parseColor("white"));
         canvas.drawRect(0, 0, llWidth, llHeight, paint);
 
-        paint.setColor(Color.parseColor("#FFFFFF"));   //white
+        paint.setColor(Color.parseColor("black"));
 
         int tickSize = llHeight/18;
         for(int i = 1; i<18; i++) {
@@ -121,19 +121,19 @@ public class DisplayChannelScan2 extends AppCompatActivity {
             if (channel > 0 && channel < 14 && signalLevel > 0) {  // ignore unexpected Wifi frequencies, and weak signals.
                 int tick = channel+2;
                // int strength = convertLevelToStrength(r.level)*llWidth/100;
-                int strength = convertLevelToStrength(r.level)*3;
+                int strength = convertLevelToStrength(r.level)*2;
                 //Log.i("DisplayChannelScan2","level = "+r.level+", signalLevel = "+signalLevel+", strength = "+strength);
 
                 switch (signalLevel){
-                    case 4: paint.setColor(Color.parseColor("#60FF0000")); //red
+                    case 4: paint.setColor(Color.parseColor("#90FF0000")); //red
                         break;
-                    case 3: paint.setColor(Color.parseColor("#60FF00FF"));  //purple
+                    case 3: paint.setColor(Color.parseColor("#90FF8000"));  //orange
                         break;
-                    case 2: paint.setColor(Color.parseColor("#60FFFF00"));  //l.yellow
+                    case 2: paint.setColor(Color.parseColor("#90FFFF00"));  //yellow
                         break;
-                    case 1: paint.setColor(Color.parseColor("#6000FF00"));  //green
+                    case 1: paint.setColor(Color.parseColor("#9000FF00"));  //green
                         break;
-                    default: paint.setColor(Color.parseColor("#60303030"));  //light grey
+                    default: paint.setColor(Color.parseColor("#90303030"));  //light grey
                         break;
                 }
                 //canvas.drawRect(30 + channelSize[channel], tickSize * (tick - 2), 30 + strength + channelSize[channel], tickSize * (tick + 2), paint);
@@ -145,7 +145,7 @@ public class DisplayChannelScan2 extends AppCompatActivity {
                 channelNames[channel] = channelNames[channel] + r.SSID + " ";
             }
         }
-        paint.setColor(Color.parseColor("white"));
+        paint.setColor(Color.parseColor("black"));
         for(int i = 1; i<13; i++) {
             canvas.drawText(channelNames[i], 30 , (i+2) * tickSize + 4, paint);  // write network names found in each channel
         }

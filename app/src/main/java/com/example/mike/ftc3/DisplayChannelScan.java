@@ -27,8 +27,8 @@ import java.util.Comparator;
 import java.util.List;
 
 public class DisplayChannelScan extends AppCompatActivity {
-    WifiManager wifi;
-    List<ScanResult> results;
+    private WifiManager wifi;
+    private List<ScanResult> results;
 
     private final BroadcastReceiver myReceiver = new BroadcastReceiver() {
         @Override
@@ -46,10 +46,10 @@ public class DisplayChannelScan extends AppCompatActivity {
         }
     };
 
-    boolean mMeasured = false;
-    int llWidth = 0;
-    int llHeight = 0;
-    LinearLayout ll;
+    private boolean mMeasured = false;
+    private int llWidth = 0;
+    private int llHeight = 0;
+    private LinearLayout ll;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -75,7 +75,7 @@ public class DisplayChannelScan extends AppCompatActivity {
         });
 
         wifi = (WifiManager) getSystemService(Context.WIFI_SERVICE);
-        if (wifi.isWifiEnabled() == false)
+        if (!wifi.isWifiEnabled())
         {
             Toast.makeText(getApplicationContext(), "wifi is disabled..making it enabled", Toast.LENGTH_LONG).show();
             wifi.setWifiEnabled(true);
@@ -86,7 +86,7 @@ public class DisplayChannelScan extends AppCompatActivity {
 
     }
 
-    public void wifiScan()
+    private  void wifiScan()
     {
         wifi.startScan();
     }
