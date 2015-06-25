@@ -98,10 +98,10 @@ public class DisplayChannelScan2 extends AppCompatActivity {
         Bitmap bg = Bitmap.createBitmap(llWidth, llHeight, Bitmap.Config.ARGB_8888);
         Canvas canvas = new Canvas(bg);
 
-        paint.setColor(Color.parseColor("white"));
+        paint.setColor(Color.parseColor("black"));
         canvas.drawRect(0, 0, llWidth, llHeight, paint);
 
-        paint.setColor(Color.parseColor("black"));
+        paint.setColor(Color.parseColor("white"));
 
         int tickSize = llHeight/18;
         for(int i = 1; i<18; i++) {
@@ -133,7 +133,7 @@ public class DisplayChannelScan2 extends AppCompatActivity {
                         break;
                     case 1: paint.setColor(Color.parseColor("#9000FF00"));  //green
                         break;
-                    default: paint.setColor(Color.parseColor("#90303030"));  //light grey
+                    default: paint.setColor(Color.parseColor("#90606060"));  //light grey
                         break;
                 }
                 //canvas.drawRect(30 + channelSize[channel], tickSize * (tick - 2), 30 + strength + channelSize[channel], tickSize * (tick + 2), paint);
@@ -145,7 +145,7 @@ public class DisplayChannelScan2 extends AppCompatActivity {
                 channelNames[channel] = channelNames[channel] + r.SSID + " ";
             }
         }
-        paint.setColor(Color.parseColor("black"));
+        paint.setColor(Color.parseColor("white"));
         for(int i = 1; i<13; i++) {
             canvas.drawText(channelNames[i], 30 , (i+2) * tickSize + 4, paint);  // write network names found in each channel
         }

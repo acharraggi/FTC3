@@ -98,10 +98,10 @@ public class DisplayChannelScan extends AppCompatActivity {
         Bitmap bg = Bitmap.createBitmap(llWidth, llHeight, Bitmap.Config.ARGB_8888);
         Canvas canvas = new Canvas(bg);
 
-        paint.setColor(Color.parseColor("#000000"));   //black
+        paint.setColor(Color.parseColor("black"));
         canvas.drawRect(0, 0, llWidth, llHeight, paint);
 
-        paint.setColor(Color.parseColor("#FFFFFF"));   //white
+        paint.setColor(Color.parseColor("white"));
 
         int tickSize = llHeight/18;
         for(int i = 1; i<18; i++) {
@@ -111,99 +111,62 @@ public class DisplayChannelScan extends AppCompatActivity {
             }
         }
 
-        for(ScanResult r: results) {
+                for(ScanResult r: results) {
             int channel = convertFrequencyToChannel(r.frequency);
             int signalLevel = WifiManager.calculateSignalLevel(r.level, 5); // returns 0 to 4
-            if (channel > 0 && signalLevel > 0) {  // ignore unexpected Wifi frequencies, and weak signals.
+            if (channel > 0 && channel < 14 && signalLevel > 0) {  // ignore unexpected Wifi frequencies, and weak signals.
                 int tick = channel+2;
                 int strength = convertLevelToStrength(r.level)*llWidth/100;
 
-                switch (signalLevel){ // adjust transparency(alpha channel) so stronger networks are more transparent
-                    case 4: paint.setColor(Color.parseColor("#2080FFFF")); // light blue colour
+
+                paint.setStyle(Paint.Style.STROKE); // try outlined ovals
+                switch (signalLevel){
+                    case 4: paint.setColor(Color.parseColor("#90FF0000"));  //red
                         break;
-                    case 3: paint.setColor(Color.parseColor("#4080FFFF"));
+                    case 3: paint.setColor(Color.parseColor("#90FF8000"));  //orange
                         break;
-                    case 2: paint.setColor(Color.parseColor("#6080FFFF"));
+                    case 2: paint.setColor(Color.parseColor("#90FFFF00"));  //yellow
                         break;
-                    case 1: paint.setColor(Color.parseColor("#8080FFFF"));
+                    case 1: paint.setColor(Color.parseColor("#9000FF00"));  //green
                         break;
-                    default: paint.setColor(Color.parseColor("#A080FFFF"));
+                    default: paint.setColor(Color.parseColor("#90303030"));  //light grey
                         break;
                 }
                 canvas.translate((-strength / 2) + 30, 0);  // shift where we draw half oval so it lines up beside the tick marks.
                 canvas.drawArc(new RectF(0, tickSize * (tick - 2), strength, tickSize * (tick + 2)), 270, 180, true, paint); // draw half an oval
+
+                paint.setStyle(Paint.Style.FILL); // fill interior with more transparent colour
+                switch (signalLevel){
+                    case 4: paint.setColor(Color.parseColor("#30FF0000"));  //red
+                        break;
+                    case 3: paint.setColor(Color.parseColor("#30FF8000"));  //orange
+                        break;
+                    case 2: paint.setColor(Color.parseColor("#30FFFF00"));  //yellow
+                        break;
+                    case 1: paint.setColor(Color.parseColor("#3000FF00"));  //green
+                        break;
+                    default: paint.setColor(Color.parseColor("#30303030"));  //light grey
+                        break;
+                }
+                canvas.drawArc(new RectF(2, tickSize * (tick - 2)+2, strength-2, tickSize * (tick + 2)-2), 270, 180, true, paint); // draw half an oval
                 canvas.translate(strength / 2 - 30, 0);     // undo shift
 
-                paint.setColor(Color.parseColor("#A080FFFF"));
-                canvas.drawText(r.SSID, strength, tick * tickSize + 4, paint);  // write network name beside oval
+                //paint.setColor(Color.parseColor("white"));
+                switch (signalLevel){
+                    case 4: paint.setColor(Color.parseColor("#FFFF0000"));  //red
+                        break;
+                    case 3: paint.setColor(Color.parseColor("#AAFF8000"));  //orange
+                        break;
+                    case 2: paint.setColor(Color.parseColor("#90FFFF00"));  //yellow
+                        break;
+                    case 1: paint.setColor(Color.parseColor("#9000FF00"));  //green
+                        break;
+                    default: paint.setColor(Color.parseColor("#90303030"));  //light grey
+                        break;
+                }
+                canvas.drawText(r.SSID, strength, tick * tickSize, paint);  // write network name beside oval
             }
         }
-
-//        paint.setColor(Color.parseColor("#A0FF0000"));  //red
-//        canvas.drawRect(30, tickSize, 200, tickSize*5, paint);
-//
-//        canvas.translate(-50,0);
-//        canvas.drawArc(new RectF(30,tickSize*10,100,tickSize*14),270,180,true,paint);
-//        canvas.translate(50,0);
-
-//        paint.setColor(Color.parseColor("#20FF0000"));  //red
-//        canvas.drawRect(0, 0, 100, 100, paint);
-//        canvas.drawRect(20, 20, 120, 120, paint);
-//        canvas.drawRect(40, 40, 140, 140, paint);
-//        canvas.drawRect(60, 60, 160, 160, paint);
-//        canvas.drawRect(80, 80, 180, 180, paint);
-
-//        paint.setColor(Color.parseColor("#FFFF0000"));  //red
-//        canvas.drawText("hello",200,200,paint);
-
-//        paint.setColor(Color.parseColor("#AAFFFF80"));  // LIGHT YELLOW
-//        for(int i = 0; i<5; i++) {
-//            canvas.drawRect(200+i*20, i*20, 300+i*20, 100+i*20, paint);
-//        }
-//
-//        paint.setColor(Color.parseColor("#A080FFFF"));  // LIGHT BLUE
-//        for(int i = 0; i<5; i++) {
-//            canvas.drawRect(200+i*20, 100+i*20, 300+i*20, 200+i*20, paint);
-//        }
-//
-//        paint.setColor(Color.parseColor("#A0FF80FF"));  // LIGHT PURPLE
-//        for(int i = 0; i<5; i++) {
-//            canvas.drawRect(200+i*20, 200+i*20, 300+i*20, 300+i*20, paint);
-//        }
-//        paint.setColor(Color.parseColor("#A0FF8080"));  // light red
-//        for(int i = 0; i<5; i++) {
-//            canvas.drawRect(200+i*20, 300+i*20, 300+i*20, 400+i*20, paint);
-//        }
-//        paint.setColor(Color.parseColor("#A08080FF"));  // medium blue
-//        for(int i = 0; i<5; i++) {
-//            canvas.drawRect(200+i*20, 400+i*20, 300+i*20, 500+i*20, paint);
-//        }
-//
-//        paint.setColor(Color.parseColor("#A080FF80"));  // light green
-//        for(int i = 0; i<5; i++) {
-//            canvas.drawRect(200+i*20, 500+i*20, 300+i*20, 600+i*20, paint);
-//        }
-//
-//        paint.setColor(Color.parseColor("#200FF000"));  //blue
-//        for(int i = 0; i<5; i++) {
-//            canvas.drawRect(i*20, 100+i*20, 100+i*20, 200+i*20, paint);
-//        }
-//        paint.setColor(Color.parseColor("#200000FF")); //green
-//        for(int i = 0; i<5; i++) {
-//            canvas.drawRect(i*20, 200+i*20, 100+i*20, 300+i*20, paint);
-//        }
-//        paint.setColor(Color.parseColor("#2000FFFF"));  // cyan
-//        for(int i = 0; i<5; i++) {
-//            canvas.drawRect(i*20, 300+i*20, 100+i*20, 400+i*20, paint);
-//        }
-//        paint.setColor(Color.parseColor("#20FF00FF"));  // magenta
-//        for(int i = 0; i<5; i++) {
-//            canvas.drawRect(i*20, 400+i*20, 100+i*20, 500+i*20, paint);
-//        }
-//        paint.setColor(Color.parseColor("#20FFFF00"));  // yellow
-//        for(int i = 0; i<5; i++) {
-//            canvas.drawRect(i*20, 500+i*20, 100+i*20, 600+i*20, paint);
-//        }
 
         ll.setBackground(new BitmapDrawable(getResources(), bg)); // set graphic as background
         ll.invalidate();   // force layout redraw
