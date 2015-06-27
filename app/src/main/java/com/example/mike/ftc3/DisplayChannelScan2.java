@@ -8,6 +8,8 @@ import android.graphics.Bitmap;
 import android.graphics.Canvas;
 import android.graphics.Color;
 import android.graphics.Paint;
+import android.graphics.Path;
+import android.graphics.Rect;
 import android.graphics.RectF;
 import android.graphics.drawable.BitmapDrawable;
 import android.net.wifi.ScanResult;
@@ -94,10 +96,13 @@ public class DisplayChannelScan2 extends AppCompatActivity {
     private void llDraw() {
         // draws on a canvas and then sets the background to be that canvas.
         Paint paint = new Paint();
+        Rect bounds = new Rect();
+        //Path myPath = new Path();
 
         Bitmap bg = Bitmap.createBitmap(llWidth, llHeight, Bitmap.Config.ARGB_8888);
         Canvas canvas = new Canvas(bg);
 
+        paint.setTextSize(getResources().getDimensionPixelSize(R.dimen.myFontSize));
         paint.setColor(Color.parseColor("black"));
         canvas.drawRect(0, 0, llWidth, llHeight, paint);
 
@@ -136,18 +141,52 @@ public class DisplayChannelScan2 extends AppCompatActivity {
                     default: paint.setColor(Color.parseColor("#90606060"));  //light grey
                         break;
                 }
-                //canvas.drawRect(30 + channelSize[channel], tickSize * (tick - 2), 30 + strength + channelSize[channel], tickSize * (tick + 2), paint);
-                canvas.drawRoundRect(new RectF(30 + channelSize[channel], tickSize * (tick - 2), 30 + strength + channelSize[channel], tickSize * (tick + 2)), 15, 15, paint);
 
-                //paint.setColor(Color.parseColor("#80202020"));  //  white
-                //canvas.drawText(r.SSID, 30 + channelSize[channel], tick * tickSize + 4, paint);  // write network name in box
+                RectF myRectF = new RectF(30 + channelSize[channel], tickSize * (tick - 2), 30 + strength + channelSize[channel], tickSize * (tick + 2));
+                canvas.drawRoundRect(myRectF, 15, 15, paint);
+                double myHypot = Math.hypot((double)myRectF.width(),(double)myRectF.height());
+
+                paint.getTextBounds(r.SSID, 0, r.SSID.length(), bounds);
+                //Log.i("DisplayChannelScan2","myHypot = "+(int)myHypot+", text width = "+ bounds.width()+", strength = "+strength);
+
+                Path myPath = new Path();
+                float hOffset = 0;
+                float vOffset = bounds.height()/2;
+
+                if(bounds.width()+2 < strength) { //+2 is to draw text at least 1 pixel inside box
+                    myPath.moveTo(31 + channelSize[channel], tickSize * tick); //31 is +1 px
+                    myPath.lineTo(29 + strength + channelSize[channel], tickSize * tick); //29 is -1px
+                    hOffset = (strength - bounds.width()) / 2;      // centre text on path
+                }
+                else {
+                    if (((float) myHypot) - (bounds.width()+2) < 0) {  //+2 is to draw text at least 1 pixel inside box
+                        hOffset = 0;  // text is bigger than hypotenuse, draw corner to corner
+                        int textOffset = strength - bounds.height() - 1;
+                        if (textOffset < 0) {
+                            textOffset = 0;
+                        }
+                        myPath.moveTo(31 + channelSize[channel], tickSize * (tick - 2) + 1); //make path just inside rectangle by 1px
+                        myPath.lineTo(31 + textOffset + channelSize[channel], tickSize * (tick + 2) - 1); // move a bit less as text drawn on top of line
+                    } else {
+                        hOffset = 0;
+                        vOffset = 0;
+
+                        // set up trig, find missing side
+                        double c = ((double)bounds.width())/2;
+                        double b = ((double)(strength))/2;
+                        int textOffset = (int)Math.round(Math.sqrt(c*c - b*b));
+                        //Log.i("DisplayChannelScan2", "textOffset = " + textOffset + ", text width = " + bounds.width() + ", strength = " + strength);
+                        myPath.moveTo(31 + channelSize[channel], (tickSize * tick) - textOffset); //make path just inside rectangle by 1px
+                        //TODO: although trig calc ok, we actually need to draw text not a line, so the '35' and '+5' below are kluges to get text to mostly fit an not get truncated
+                        myPath.lineTo(35 + channelSize[channel]+ strength - bounds.height(), (tickSize * tick) + textOffset + bounds.height()+5); // move a bit more as text drawn on top of line
+                     }
+                }
+                paint.setColor(Color.parseColor("white"));
+                canvas.drawTextOnPath(r.SSID,myPath,hOffset,vOffset,paint);  // naturally truncates if text too big to fit on path
+
                 channelSize[channel] = channelSize[channel] + strength;
                 channelNames[channel] = channelNames[channel] + r.SSID + " ";
             }
-        }
-        paint.setColor(Color.parseColor("white"));
-        for(int i = 1; i<13; i++) {
-            canvas.drawText(channelNames[i], 30 , (i+2) * tickSize + 4, paint);  // write network names found in each channel
         }
 
         ll.setBackground(new BitmapDrawable(getResources(), bg)); // set graphic as background
