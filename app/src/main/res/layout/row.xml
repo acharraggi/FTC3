@@ -4,36 +4,36 @@
     android:layout_height="match_parent">
     <TextView
         android:id="@+id/SSID"
-        android:width="100dp"
+        android:width="130sp"
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
         android:text="@+id/label"
-        android:textSize="15sp"
+        android:textSize="@dimen/myFontSize"
         android:ellipsize="end"
         android:singleLine="true">
     </TextView>
     <TextView
         android:id="@+id/frequency"
-        android:width="50dp"
+        android:width="50sp"
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
         android:text="@+id/label"
-        android:textSize="15sp" >
+        android:textSize="@dimen/myFontSize" >
     </TextView>
     <TextView
         android:id="@+id/channel"
-        android:width="75dp"
+        android:width="60sp"
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
         android:text="@+id/label"
-        android:textSize="15sp" >
+        android:textSize="@dimen/myFontSize" >
     </TextView>
     <TextView
         android:id="@+id/strength"
-        android:width="75dp"
+        android:width="60sp"
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
         android:text="@+id/label"
-        android:textSize="15sp" >
+        android:textSize="@dimen/myFontSize" >
     </TextView>
 </LinearLayout>

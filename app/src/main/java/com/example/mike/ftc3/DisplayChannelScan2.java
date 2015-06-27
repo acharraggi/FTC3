@@ -41,7 +41,8 @@ public class DisplayChannelScan2 extends AppCompatActivity {
             Collections.sort(results, new Comparator<ScanResult>() {
                 @Override
                 public int compare(final ScanResult object1, final ScanResult object2) {
-                    return (object2.level - object1.level);
+                    // level is a number between about -90 to -50 with -90 being weaker.
+                    return (object1.level - object2.level); // stronger networks will print last
                 }
             });
             llDraw();  // redraw the network graphic
@@ -130,9 +131,9 @@ public class DisplayChannelScan2 extends AppCompatActivity {
                 //Log.i("DisplayChannelScan2","level = "+r.level+", signalLevel = "+signalLevel+", strength = "+strength);
 
                 switch (signalLevel){
-                    case 4: paint.setColor(Color.parseColor("#90FF0000")); //red
+                    case 4: paint.setColor(Color.parseColor("#90FF0000")); //red 90FF0000
                         break;
-                    case 3: paint.setColor(Color.parseColor("#90FF8000"));  //orange
+                    case 3: paint.setColor(Color.parseColor("#90FF00FF"));  //purple 90FFFF00 (orange 90FF8000)
                         break;
                     case 2: paint.setColor(Color.parseColor("#90FFFF00"));  //yellow
                         break;
@@ -153,14 +154,15 @@ public class DisplayChannelScan2 extends AppCompatActivity {
                 float hOffset = 0;
                 float vOffset = bounds.height()/2;
 
-                if(bounds.width()+2 < strength) { //+2 is to draw text at least 1 pixel inside box
+                if(bounds.width()+2 <= strength) { //+2 is to draw text at least 1 pixel inside box
                     myPath.moveTo(31 + channelSize[channel], tickSize * tick); //31 is +1 px
-                    myPath.lineTo(29 + strength + channelSize[channel], tickSize * tick); //29 is -1px
-                    hOffset = (strength - bounds.width()) / 2;      // centre text on path
+                    myPath.lineTo(30 + strength + channelSize[channel], tickSize * tick);
+                    hOffset = (strength - (bounds.width()+2)) / 2;      // centre text on path
                 }
                 else {
                     if (((float) myHypot) - (bounds.width()+2) < 0) {  //+2 is to draw text at least 1 pixel inside box
                         hOffset = 0;  // text is bigger than hypotenuse, draw corner to corner
+                        vOffset = 0;
                         int textOffset = strength - bounds.height() - 1;
                         if (textOffset < 0) {
                             textOffset = 0;
@@ -170,9 +172,12 @@ public class DisplayChannelScan2 extends AppCompatActivity {
                     } else {
                         hOffset = 0;
                         vOffset = 0;
-
+                        int textWidth = bounds.width();
+                        if (textWidth > (int)myHypot) {
+                            textWidth = (int)myHypot;
+                        }
                         // set up trig, find missing side
-                        double c = ((double)bounds.width())/2;
+                        double c = ((double)textWidth)/2;
                         double b = ((double)(strength))/2;
                         int textOffset = (int)Math.round(Math.sqrt(c*c - b*b));
                         //Log.i("DisplayChannelScan2", "textOffset = " + textOffset + ", text width = " + bounds.width() + ", strength = " + strength);
