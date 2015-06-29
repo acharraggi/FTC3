@@ -10,4 +10,8 @@
     <string name="title_activity_display_channel_scan">Channel Scan</string>
     <string name="title_activity_display_channel_scan2">Channel Scan2</string>
     <string name="button_channel_scan2">Channel Scan (boxes)</string>
+    <string name="header_ssid">Network (SSID)</string>
+    <string name="header_freq">Freq.</string>
+    <string name="header_channel">Channel</string>
+    <string name="header_strength">Strength</string>
 </resources>

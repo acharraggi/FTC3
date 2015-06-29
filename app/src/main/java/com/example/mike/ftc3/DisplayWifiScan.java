@@ -66,6 +66,9 @@ public class DisplayWifiScan extends AppCompatActivity implements View.OnClickLi
         buttonScan.setOnClickListener(this);
         ListView lv = (ListView)findViewById(R.id.list);
 
+        View header = getLayoutInflater().inflate(R.layout.header, null);
+        lv.addHeaderView(header);
+
         wifi = (WifiManager) getSystemService(Context.WIFI_SERVICE);
         if (!wifi.isWifiEnabled())
         {
@@ -102,17 +105,6 @@ public class DisplayWifiScan extends AppCompatActivity implements View.OnClickLi
         arraylist.clear();
         Toast.makeText(this, "Wifi network(s) found = " + size, Toast.LENGTH_SHORT).show();
 
-        // add column headers
-        { // add block so item can be reused in while loop later
-            HashMap<String, String> item = new HashMap<String, String>();
-            item.put("SSID", "SSID");
-            item.put("frequency", "Freq.");
-            item.put("channel", "Channel");
-            item.put("strength", "Strength");
-            arraylist.add(item);
-            adapter.notifyDataSetChanged();
-        }
-
         size = size - 1;
         while (size >= 0)
         {
@@ -128,6 +120,7 @@ public class DisplayWifiScan extends AppCompatActivity implements View.OnClickLi
             size--;
             adapter.notifyDataSetChanged();
         }
+        adapter.notifyDataSetChanged();
     }
 
     public void onClick(View view)
