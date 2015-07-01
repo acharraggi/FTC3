@@ -14,4 +14,6 @@
     <string name="header_freq">Freq.</string>
     <string name="header_channel">Channel</string>
     <string name="header_strength">Strength</string>
+    <string name="button_wifi_scan2">WIFI networks scan (new)</string>
+    <string name="title_activity_display_wifi_scan2">Wifi Scan</string>
 </resources>

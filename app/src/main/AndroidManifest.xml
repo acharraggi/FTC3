@@ -46,6 +46,14 @@
                 android:name="android.support.PARENT_ACTIVITY"
                 android:value="com.example.mike.ftc3.MainActivity" />
         </activity>
+        <activity
+            android:name=".DisplayWifiScan2"
+            android:label="@string/title_activity_display_wifi_scan2"
+            android:parentActivityName=".MainActivity" >
+            <meta-data
+                android:name="android.support.PARENT_ACTIVITY"
+                android:value="com.example.mike.ftc3.MainActivity" />
+        </activity>
     </application>
 
 </manifest>

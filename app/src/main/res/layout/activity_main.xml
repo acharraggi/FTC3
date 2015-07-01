@@ -28,4 +28,11 @@
         android:layout_height="wrap_content"
         android:onClick="displayChannelScan2"
         android:text="@string/button_channel_scan2" />
+
+    <Button
+        android:id="@+id/button8"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:onClick="displayWifiScan2"
+        android:text="@string/button_wifi_scan2" />
 </LinearLayout>
