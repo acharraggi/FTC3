@@ -18,7 +18,7 @@ Screen 2
 
 Screen 3
 
-![Screen 3 image](doc/device-2015-06-27-163717.png "Screen 3 - Wifi networks as boxes")
+![Screen 3 image](doc/device-2015-07-03-132826.png "Screen 3 - Wifi networks as boxes")
 
 Screen 4
 
@@ -38,3 +38,4 @@ Change History:
 - v0.4 change colours again, ovals are looking better with outlines highlighted. Names need work.
 - v0.5 change colours again, Wifi names in boxes now try to fit horizontally, and if not, they print at an angle within the box. Stronger networks print on top of weaker. Wifi networks font sizes tweaked.
 - v0.6 added fourth screen, a better looking Wifi networks list that adjusts to user's screens and preferences.
+- v0.7 changed 3rd screen to not angle names in boxes, but print either horizontally or vertically.

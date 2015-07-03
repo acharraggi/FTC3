@@ -28,6 +28,7 @@ import java.util.Collections;
 import java.util.Comparator;
 import java.util.List;
 
+//TODO: allow user to specify natural portait or vertical orientation in settings. currently vertical is assumed.
 public class DisplayChannelScan2 extends AppCompatActivity {
     private WifiManager wifi;
     private List<ScanResult> results;
@@ -118,9 +119,28 @@ public class DisplayChannelScan2 extends AppCompatActivity {
         }
 
         int channelSize[] = new int[] {0,0,0,0,0,0,0,0,0,0,0,0,0,0}; // declare size 14
-        String channelNames[] = new String[] {"","","","","","","","","","","","","",""};
+
+//        { // font metric test
+//            int y = 50;
+//            Paint.FontMetrics fm = paint.getFontMetrics();
+//            Log.d("DisplayChannelScan2", "fm.bottom: "+fm.bottom + " fm.top:"+fm.top+" "+" fm.leading:"+fm.leading +" fm.ascent:"+fm.ascent+" fm.descent:"+fm.descent);
+////            int fontHeight = Math.round(fm.bottom - fm.top + fm.leading);
+//            int fontHeight = Math.round(fm.descent - fm.ascent);
+//            char c[] = "This is a TEST".toCharArray();
+//            for (int x = 0; x < c.length; x++) {
+//                canvas.drawText(c, x, 1, 450, y, paint);
+//                y += fontHeight;
+//            }
+//        }
+        Paint.FontMetrics fm = paint.getFontMetrics();
+        int fontHeight = (int)(fm.descent - fm.ascent);
+        //Log.d("DisplayChannelScan2", "fontMetrics.bottom: " + fm.bottom + " fm.top:" + fm.top + " " + " fm.leading:" + fm.leading + " fm.ascent:" + fm.ascent + " fm.descent:" + fm.descent);
+        //paint.getTextBounds("X", 0, 1, bounds);
+        //int fontWidth = bounds.width();
 
         for(ScanResult r: results) {
+            //TODO: currently draws weak networks first, to the left, but with lots of networks, strong networks can get pushed off screen to the right.
+            //TODO: could do one or more pre-passes and if anything pushes off to the right, then drop weakest networks until things fit.
             int channel = convertFrequencyToChannel(r.frequency);
             int signalLevel = WifiManager.calculateSignalLevel(r.level, 5); // returns 0 to 4
 
@@ -154,43 +174,51 @@ public class DisplayChannelScan2 extends AppCompatActivity {
                 float hOffset = 0;
                 float vOffset = bounds.height()/2;
 
+                paint.setColor(Color.parseColor("white"));
                 if(bounds.width()+2 <= strength) { //+2 is to draw text at least 1 pixel inside box
+                    paint.setTextAlign(Paint.Align.LEFT);
                     myPath.moveTo(31 + channelSize[channel], tickSize * tick); //31 is +1 px
                     myPath.lineTo(30 + strength + channelSize[channel], tickSize * tick);
                     hOffset = (strength - (bounds.width()+2)) / 2;      // centre text on path
+                    canvas.drawTextOnPath(r.SSID,myPath,hOffset,vOffset,paint);  // naturally truncates if text too big to fit on path
                 }
                 else {
-                    if (((float) myHypot) - (bounds.width()+2) < 0) {  //+2 is to draw text at least 1 pixel inside box
-                        hOffset = 0;  // text is bigger than hypotenuse, draw corner to corner
-                        vOffset = 0;
-                        int textOffset = strength - bounds.height() - 1;
-                        if (textOffset < 0) {
-                            textOffset = 0;
-                        }
-                        myPath.moveTo(31 + channelSize[channel], tickSize * (tick - 2) + 1); //make path just inside rectangle by 1px
-                        myPath.lineTo(31 + textOffset + channelSize[channel], tickSize * (tick + 2) - 1); // move a bit less as text drawn on top of line
-                    } else {
-                        hOffset = 0;
-                        vOffset = 0;
-                        int textWidth = bounds.width();
-                        if (textWidth > (int)myHypot) {
-                            textWidth = (int)myHypot;
-                        }
-                        // set up trig, find missing side
-                        double c = ((double)textWidth)/2;
-                        double b = ((double)(strength))/2;
-                        int textOffset = (int)Math.round(Math.sqrt(c*c - b*b));
-                        //Log.i("DisplayChannelScan2", "textOffset = " + textOffset + ", text width = " + bounds.width() + ", strength = " + strength);
-                        myPath.moveTo(31 + channelSize[channel], (tickSize * tick) - textOffset); //make path just inside rectangle by 1px
-                        //TODO: although trig calc ok, we actually need to draw text not a line, so the '35' and '+5' below are kluges to get text to mostly fit an not get truncated
-                        myPath.lineTo(35 + channelSize[channel]+ strength - bounds.height(), (tickSize * tick) + textOffset + bounds.height()+5); // move a bit more as text drawn on top of line
-                     }
-                }
-                paint.setColor(Color.parseColor("white"));
-                canvas.drawTextOnPath(r.SSID,myPath,hOffset,vOffset,paint);  // naturally truncates if text too big to fit on path
+                    paint.setTextAlign(Paint.Align.CENTER);  // letters drawn centred on x,y coords
+                    char c[] = r.SSID.toCharArray();
+                    int cHeight[] = new int[c.length];
+                    int cTotal = 0;
 
+                    for (int i=0; i<c.length; i++){  // precalculate character heights
+                        paint.getTextBounds(c, i, 1, bounds);
+                        if(c[i] == ' ') {
+                            cHeight[i] = fontHeight/2; // blanks have a bounds.height of zero
+                        }
+                        else {
+                            cHeight[i] = bounds.height();
+                        }
+                        cTotal += bounds.height()+3; // include char spacer
+                    }
+//                    if (cTotal > 3) {
+//                        cTotal = cTotal - 3;
+//                    }
+
+                    int x = 31 + (strength/2) + channelSize[channel];
+                    int y;
+                    if(cTotal >=  (tickSize * (tick+2)) - (tickSize * (tick-2))) {
+                        y = tickSize * (tick-2) + fontHeight/2;  // start at top of box
+                    }
+                    else {
+                        y = (((tickSize * (tick+2)) - (tickSize * (tick-2)))-cTotal)/2 + tickSize * (tick-2) ;  // centre text vertically
+                    }
+                    int maxY = tickSize * (tick+2) - fontHeight/2;
+
+                    for (int i = 0; i < c.length && y < maxY; i++) {  // draw string vertically but letters horizontal
+                        paint.getTextBounds(c, i, 1, bounds);
+                        canvas.drawText(c, i, 1, x, y + (cHeight[i]/2) + 2, paint);  // slight offset +2 seems to help with tall characters
+                        y += cHeight[i] + 3; // char spacer
+                    }
+                }
                 channelSize[channel] = channelSize[channel] + strength;
-                channelNames[channel] = channelNames[channel] + r.SSID + " ";
             }
         }
 
