@@ -18,11 +18,16 @@ Screen 2
 
 Screen 3
 
-![Screen 3 image](doc/device-2015-07-03-132826.png "Screen 3 - Wifi networks as boxes")
+![Screen 3 image](doc/device-2015-07-07-082221.png "Screen 3 - Wifi networks as boxes")
+![Screen 3 horizontal image](doc/device-2015-07-07-082042.png "Screen 3 - horizontal")
 
 Screen 4
 
 ![Screen 4 image](doc/device-2015-07-01-104243.png "Screen 4 - Wifi networks channel and strength")
+
+Settings Screen
+
+![Settings Screen image](doc/device-2015-07-07-080535.png "Settings Screen")
 
 I'm not very happy with screen 2, too much overlap, too hard to read network names.
 
@@ -39,3 +44,4 @@ Change History:
 - v0.5 change colours again, Wifi names in boxes now try to fit horizontally, and if not, they print at an angle within the box. Stronger networks print on top of weaker. Wifi networks font sizes tweaked.
 - v0.6 added fourth screen, a better looking Wifi networks list that adjusts to user's screens and preferences.
 - v0.7 changed 3rd screen to not angle names in boxes, but print either horizontally or vertically.
+- v0.8 added a Settings screen and options to exclude weak wifi networks and change orientation for screen 3

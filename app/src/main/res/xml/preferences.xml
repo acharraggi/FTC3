@@ -1,0 +1,22 @@
+<?xml version="1.0" encoding="utf-8"?>
+<PreferenceScreen xmlns:android="http://schemas.android.com/apk/res/android">
+    <PreferenceCategory
+        android:title="3491 Scanner Preferences"
+        android:key="first_category">
+
+    <CheckBoxPreference
+        android:key="exclude_weak_wifi"
+        android:summary="Exclude weak wifi networks"
+        android:title="Exclude Weak Wifi"
+        android:defaultValue="true"
+        />
+
+    <CheckBoxPreference
+        android:key="is_vertical"
+        android:summary="Is your screen naturally vertically orientated?"
+        android:title="Vertical Orientation"
+        android:defaultValue="true"
+        />
+
+    </PreferenceCategory>
+</PreferenceScreen>

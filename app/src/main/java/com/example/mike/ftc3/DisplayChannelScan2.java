@@ -4,6 +4,7 @@ import android.content.BroadcastReceiver;
 import android.content.Context;
 import android.content.Intent;
 import android.content.IntentFilter;
+import android.content.SharedPreferences;
 import android.graphics.Bitmap;
 import android.graphics.Canvas;
 import android.graphics.Color;
@@ -16,6 +17,7 @@ import android.net.wifi.ScanResult;
 import android.net.wifi.WifiManager;
 //import android.support.v7.app.ActionBarActivity;
 import android.os.Bundle;
+import android.preference.PreferenceManager;
 import android.support.v7.app.AppCompatActivity;
 import android.util.Log;
 import android.view.Menu;
@@ -28,10 +30,35 @@ import java.util.Collections;
 import java.util.Comparator;
 import java.util.List;
 
-//TODO: allow user to specify natural portait or vertical orientation in settings. currently vertical is assumed.
 public class DisplayChannelScan2 extends AppCompatActivity {
     private WifiManager wifi;
     private List<ScanResult> results;
+
+    // preference variables
+    private Boolean excludeWeakWifi = true;
+    private Boolean isVertical = true;
+    private SharedPreferences sharedPref;
+    private final SharedPreferences.OnSharedPreferenceChangeListener prefListener =
+            new SharedPreferences.OnSharedPreferenceChangeListener() {
+                public void onSharedPreferenceChanged(SharedPreferences prefs,
+                                                      String key) {
+                    Log.d("DisplayChannelScan2", "myReceiver called, key="+key);
+                    if (key.equals("exclude_weak_wifi")) {
+                        boolean newValue=prefs.getBoolean("exclude_weak_wifi", false);
+                        if(newValue != excludeWeakWifi) {
+                            excludeWeakWifi = newValue;
+                            wifiScan();  //rescan
+                        }
+                    }
+                    if (key.equals("is_vertical")) {
+                        boolean newValue=prefs.getBoolean("is_vertical", false);
+                        if(newValue != isVertical) {
+                            isVertical = newValue;
+                            wifiScan();  //rescan
+                        }
+                    }
+                }
+            };
 
     private final BroadcastReceiver myReceiver = new BroadcastReceiver() {
         @Override
@@ -60,8 +87,13 @@ public class DisplayChannelScan2 extends AppCompatActivity {
         Log.i("DisplayChannelScan2", "onCreate called");
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_display_channel_scan2);
-
         ll = (LinearLayout) findViewById(R.id.channel_scan2);
+
+        sharedPref = PreferenceManager.getDefaultSharedPreferences(this);
+        excludeWeakWifi = sharedPref.getBoolean("exclude_weak_wifi", true);
+        isVertical = sharedPref.getBoolean("is_vertical", true);
+        sharedPref.registerOnSharedPreferenceChangeListener(prefListener);
+        Log.d("DisplayWifiScan2", "excludeWeakWifi = " + excludeWeakWifi + ", isVertical = " + isVertical);
 
         ll.getViewTreeObserver().addOnGlobalLayoutListener(new ViewTreeObserver.OnGlobalLayoutListener() {
             @Override
@@ -95,48 +127,57 @@ public class DisplayChannelScan2 extends AppCompatActivity {
         wifi.startScan();
     }
 
+    private void drawTicks(Canvas canvas, int tickSize, Paint paint) {
+        Paint.FontMetrics fm = paint.getFontMetrics();
+        int fontHeight = (int)(fm.descent - fm.ascent);
+        Rect bounds = new Rect();
+        for(int i = 1; i<18; i++) {
+            if(isVertical) {
+                canvas.drawLine(18, i * tickSize, 25, i * tickSize, paint); // draw tick marks
+            }
+            else {
+                canvas.drawLine(i * tickSize, llHeight-(fontHeight+9), i * tickSize, llHeight-(fontHeight+2), paint); // draw tick marks
+            }
+            if(i>2 && i<16) {
+                if(isVertical) {
+                    canvas.drawText(String.valueOf(i - 2), 0, i * tickSize + 4, paint);  // add channel numbers beside tick marks
+                }
+                else {
+                    String s = String.valueOf(i - 2);
+                    paint.getTextBounds(s, 0, s.length(), bounds);
+                    canvas.drawText(String.valueOf(i - 2), i * tickSize - bounds.width()/2 -1, llHeight-fm.descent , paint);  // add channel numbers under tick marks
+                }
+            }
+        }
+    }
     private void llDraw() {
+        Log.d("DisplayChannelScan2", "llDraw called");
         // draws on a canvas and then sets the background to be that canvas.
         Paint paint = new Paint();
         Rect bounds = new Rect();
-        //Path myPath = new Path();
+        int tickSize;
+        if(isVertical) {
+            tickSize = llHeight / 18;
+        }
+        else {
+            tickSize = llWidth / 18;
+        }
 
         Bitmap bg = Bitmap.createBitmap(llWidth, llHeight, Bitmap.Config.ARGB_8888);
         Canvas canvas = new Canvas(bg);
 
         paint.setTextSize(getResources().getDimensionPixelSize(R.dimen.myFontSize));
+        Paint.FontMetrics fm = paint.getFontMetrics();
+        int fontHeight = (int)(fm.descent - fm.ascent);
+
         paint.setColor(Color.parseColor("black"));
         canvas.drawRect(0, 0, llWidth, llHeight, paint);
 
         paint.setColor(Color.parseColor("white"));
 
-        int tickSize = llHeight/18;
-        for(int i = 1; i<18; i++) {
-            canvas.drawLine(18, i * tickSize, 25, i * tickSize, paint); // draw tick marks
-            if(i>2 && i<16) {
-                canvas.drawText(String.valueOf(i - 2), 0, i * tickSize + 4, paint);  // add channel numbers beside tick marks
-            }
-        }
+        drawTicks(canvas, tickSize, paint);
 
         int channelSize[] = new int[] {0,0,0,0,0,0,0,0,0,0,0,0,0,0}; // declare size 14
-
-//        { // font metric test
-//            int y = 50;
-//            Paint.FontMetrics fm = paint.getFontMetrics();
-//            Log.d("DisplayChannelScan2", "fm.bottom: "+fm.bottom + " fm.top:"+fm.top+" "+" fm.leading:"+fm.leading +" fm.ascent:"+fm.ascent+" fm.descent:"+fm.descent);
-////            int fontHeight = Math.round(fm.bottom - fm.top + fm.leading);
-//            int fontHeight = Math.round(fm.descent - fm.ascent);
-//            char c[] = "This is a TEST".toCharArray();
-//            for (int x = 0; x < c.length; x++) {
-//                canvas.drawText(c, x, 1, 450, y, paint);
-//                y += fontHeight;
-//            }
-//        }
-        Paint.FontMetrics fm = paint.getFontMetrics();
-        int fontHeight = (int)(fm.descent - fm.ascent);
-        //Log.d("DisplayChannelScan2", "fontMetrics.bottom: " + fm.bottom + " fm.top:" + fm.top + " " + " fm.leading:" + fm.leading + " fm.ascent:" + fm.ascent + " fm.descent:" + fm.descent);
-        //paint.getTextBounds("X", 0, 1, bounds);
-        //int fontWidth = bounds.width();
 
         for(ScanResult r: results) {
             //TODO: currently draws weak networks first, to the left, but with lots of networks, strong networks can get pushed off screen to the right.
@@ -144,79 +185,108 @@ public class DisplayChannelScan2 extends AppCompatActivity {
             int channel = convertFrequencyToChannel(r.frequency);
             int signalLevel = WifiManager.calculateSignalLevel(r.level, 5); // returns 0 to 4
 
-            if (channel > 0 && channel < 14 && signalLevel > 0) {  // ignore unexpected Wifi frequencies, and weak signals.
-                int tick = channel+2;
-               // int strength = convertLevelToStrength(r.level)*llWidth/100;
-                int strength = convertLevelToStrength(r.level)*2;
+            int signalTest = -1;
+            if(excludeWeakWifi) {
+                signalTest = 0;
+            }
+            if (channel > 0 && channel < 14 && signalLevel > signalTest) {  // ignore unexpected Wifi frequencies
+                int tick = channel + 2;
+                // int strength = convertLevelToStrength(r.level)*llWidth/100;
+                int strength = convertLevelToStrength(r.level) * 2;
                 //Log.i("DisplayChannelScan2","level = "+r.level+", signalLevel = "+signalLevel+", strength = "+strength);
 
-                switch (signalLevel){
-                    case 4: paint.setColor(Color.parseColor("#90FF0000")); //red 90FF0000
+                switch (signalLevel) {
+                    case 4:
+                        paint.setColor(Color.parseColor("#90FF0000")); //red 90FF0000
                         break;
-                    case 3: paint.setColor(Color.parseColor("#90FF00FF"));  //purple 90FFFF00 (orange 90FF8000)
+                    case 3:
+                        paint.setColor(Color.parseColor("#90FF00FF"));  //purple 90FFFF00 (orange 90FF8000)
                         break;
-                    case 2: paint.setColor(Color.parseColor("#90FFFF00"));  //yellow
+                    case 2:
+                        paint.setColor(Color.parseColor("#90FFFF00"));  //yellow
                         break;
-                    case 1: paint.setColor(Color.parseColor("#9000FF00"));  //green
+                    case 1:
+                        paint.setColor(Color.parseColor("#9000FF00"));  //green
                         break;
-                    default: paint.setColor(Color.parseColor("#90606060"));  //light grey
+                    default:
+                        paint.setColor(Color.parseColor("#90606060"));  //light grey
                         break;
                 }
 
-                RectF myRectF = new RectF(30 + channelSize[channel], tickSize * (tick - 2), 30 + strength + channelSize[channel], tickSize * (tick + 2));
+                RectF myRectF;
+                if (isVertical) {
+                    myRectF = new RectF(30 + channelSize[channel], tickSize * (tick - 2), 30 + strength + channelSize[channel], tickSize * (tick + 2));
+                } else {
+                    int vOffset = llHeight - fontHeight - 9;
+                    myRectF = new RectF(tickSize * (tick - 2), vOffset - strength - channelSize[channel], tickSize * (tick + 2), vOffset - channelSize[channel]);
+                }
                 canvas.drawRoundRect(myRectF, 15, 15, paint);
-                double myHypot = Math.hypot((double)myRectF.width(),(double)myRectF.height());
+                //double myHypot = Math.hypot((double)myRectF.width(),(double)myRectF.height());
 
                 paint.getTextBounds(r.SSID, 0, r.SSID.length(), bounds);
                 //Log.i("DisplayChannelScan2","myHypot = "+(int)myHypot+", text width = "+ bounds.width()+", strength = "+strength);
 
                 Path myPath = new Path();
                 float hOffset = 0;
-                float vOffset = bounds.height()/2;
+                float vOffset = bounds.height() / 2;
 
                 paint.setColor(Color.parseColor("white"));
-                if(bounds.width()+2 <= strength) { //+2 is to draw text at least 1 pixel inside box
-                    paint.setTextAlign(Paint.Align.LEFT);
-                    myPath.moveTo(31 + channelSize[channel], tickSize * tick); //31 is +1 px
-                    myPath.lineTo(30 + strength + channelSize[channel], tickSize * tick);
-                    hOffset = (strength - (bounds.width()+2)) / 2;      // centre text on path
-                    canvas.drawTextOnPath(r.SSID,myPath,hOffset,vOffset,paint);  // naturally truncates if text too big to fit on path
-                }
-                else {
-                    paint.setTextAlign(Paint.Align.CENTER);  // letters drawn centred on x,y coords
-                    char c[] = r.SSID.toCharArray();
-                    int cHeight[] = new int[c.length];
-                    int cTotal = 0;
-
-                    for (int i=0; i<c.length; i++){  // precalculate character heights
-                        paint.getTextBounds(c, i, 1, bounds);
-                        if(c[i] == ' ') {
-                            cHeight[i] = fontHeight/2; // blanks have a bounds.height of zero
-                        }
-                        else {
-                            cHeight[i] = bounds.height();
-                        }
-                        cTotal += bounds.height()+3; // include char spacer
+                if (!isVertical) {
+                    vOffset = llHeight - fontHeight - 9 - strength/2 - channelSize[channel];
+                    //Log.d("DisplayChannelScan2", "vOffset=" + vOffset + ", channel=" + channel + ", llHeight=" + llHeight);
+                    int start = 1 + tickSize*(tick-2);
+                    int end = tickSize*(tick+2) - 1;
+                    if ((end-start)>bounds.width()) {
+                        paint.setTextAlign(Paint.Align.CENTER);
                     }
+                    else {
+                        paint.setTextAlign(Paint.Align.LEFT);
+                    }
+                    myPath.moveTo(start, vOffset);
+                    myPath.lineTo(end,vOffset);
+                    canvas.drawTextOnPath(r.SSID, myPath, 0, fm.descent, paint);  // naturally truncates if text too big to fit on path
+                } else {
+                    if (bounds.width() + 2 <= strength) { //+2 is to draw text at least 1 pixel inside box
+                        paint.setTextAlign(Paint.Align.LEFT);
+                        myPath.moveTo(31 + channelSize[channel], tickSize * tick); //31 is +1 px
+                        myPath.lineTo(30 + strength + channelSize[channel], tickSize * tick);
+                        hOffset = (strength - (bounds.width() + 2)) / 2;      // centre text on path
+                        canvas.drawTextOnPath(r.SSID, myPath, hOffset, vOffset, paint);  // naturally truncates if text too big to fit on path
+                    } else {
+                        paint.setTextAlign(Paint.Align.CENTER);  // letters drawn centred on x,y coords
+                        char c[] = r.SSID.toCharArray();
+                        int cHeight[] = new int[c.length];
+                        int cTotal = 0;
+
+                        for (int i = 0; i < c.length; i++) {  // precalculate character heights
+                            paint.getTextBounds(c, i, 1, bounds);
+                            if (c[i] == ' ') {
+                                cHeight[i] = fontHeight / 2; // blanks have a bounds.height of zero
+                            } else {
+                                cHeight[i] = bounds.height();
+                            }
+                            cTotal += bounds.height() + 3; // include char spacer
+                        }
 //                    if (cTotal > 3) {
 //                        cTotal = cTotal - 3;
 //                    }
 
-                    int x = 31 + (strength/2) + channelSize[channel];
-                    int y;
-                    if(cTotal >=  (tickSize * (tick+2)) - (tickSize * (tick-2))) {
-                        y = tickSize * (tick-2) + fontHeight/2;  // start at top of box
-                    }
-                    else {
-                        y = (((tickSize * (tick+2)) - (tickSize * (tick-2)))-cTotal)/2 + tickSize * (tick-2) ;  // centre text vertically
-                    }
-                    int maxY = tickSize * (tick+2) - fontHeight/2;
+                        int x = 31 + (strength / 2) + channelSize[channel];
+                        int y;
+                        if (cTotal >= (tickSize * (tick + 2)) - (tickSize * (tick - 2))) {
+                            y = tickSize * (tick - 2) + fontHeight / 2;  // start at top of box
+                        } else {
+                            y = (((tickSize * (tick + 2)) - (tickSize * (tick - 2))) - cTotal) / 2 + tickSize * (tick - 2);  // centre text vertically
+                        }
+                        int maxY = tickSize * (tick + 2) - fontHeight / 2;
 
-                    for (int i = 0; i < c.length && y < maxY; i++) {  // draw string vertically but letters horizontal
-                        paint.getTextBounds(c, i, 1, bounds);
-                        canvas.drawText(c, i, 1, x, y + (cHeight[i]/2) + 2, paint);  // slight offset +2 seems to help with tall characters
-                        y += cHeight[i] + 3; // char spacer
+                        for (int i = 0; i < c.length && y < maxY; i++) {  // draw string vertically but letters horizontal
+                            paint.getTextBounds(c, i, 1, bounds);
+                            canvas.drawText(c, i, 1, x, y + (cHeight[i] / 2) + 2, paint);  // slight offset +2 seems to help with tall characters
+                            y += cHeight[i] + 3; // char spacer
+                        }
                     }
+
                 }
                 channelSize[channel] = channelSize[channel] + strength;
             }
@@ -240,8 +310,9 @@ public class DisplayChannelScan2 extends AppCompatActivity {
         // as you specify a parent activity in AndroidManifest.xml.
         int id = item.getItemId();
 
-        //noinspection SimplifiableIfStatement
         if (id == R.id.action_settings) {
+            Intent intent = new Intent(this, SettingsActivity.class);
+            startActivity(intent);
             return true;
         }
 
@@ -252,6 +323,7 @@ public class DisplayChannelScan2 extends AppCompatActivity {
     public void onDestroy() {
         super.onDestroy();
         unregisterReceiver(myReceiver);  // unregister the Wifi receiver
+        sharedPref.unregisterOnSharedPreferenceChangeListener(prefListener);
     }
 
     private static int convertFrequencyToChannel(int freq) {

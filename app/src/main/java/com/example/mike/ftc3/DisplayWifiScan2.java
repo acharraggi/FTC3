@@ -4,12 +4,14 @@ import android.content.BroadcastReceiver;
 import android.content.Context;
 import android.content.Intent;
 import android.content.IntentFilter;
+import android.content.SharedPreferences;
 import android.graphics.Color;
 import android.graphics.Typeface;
 import android.graphics.drawable.GradientDrawable;
 import android.net.wifi.ScanResult;
 import android.net.wifi.WifiManager;
 import android.os.Bundle;
+import android.preference.PreferenceManager;
 import android.support.v7.app.AppCompatActivity;
 import android.text.TextUtils;
 import android.util.Log;
@@ -30,6 +32,24 @@ public class DisplayWifiScan2 extends AppCompatActivity {
     private int size = 0;
     private List<ScanResult> results;
     private boolean startDisplay = false;
+
+    // preference variables
+    private volatile Boolean excludeWeakWifi = true;
+    private SharedPreferences sharedPref;
+    private final SharedPreferences.OnSharedPreferenceChangeListener prefListener =
+            new SharedPreferences.OnSharedPreferenceChangeListener() {
+                public void onSharedPreferenceChanged(SharedPreferences prefs,
+                                                      String key) {
+                    Log.d("DisplayWifiScan2", "myReceiver called, key="+key);
+                    if (key.equals("exclude_weak_wifi")) {
+                        boolean newValue=prefs.getBoolean("exclude_weak_wifi", false);
+                        if(newValue != excludeWeakWifi) {
+                            excludeWeakWifi = newValue;
+                            wifiScan();  //rescan
+                        }
+                    }
+                }
+            };
 
     private final BroadcastReceiver myReceiver = new BroadcastReceiver() {
         @Override
@@ -64,8 +84,13 @@ public class DisplayWifiScan2 extends AppCompatActivity {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_display_wifi_scan2);
         tl = (TableLayout) findViewById(R.id.maintable);
-        //tl.setGravity(Gravity.BOTTOM);
 
+        sharedPref = PreferenceManager.getDefaultSharedPreferences(this);
+        excludeWeakWifi = sharedPref.getBoolean("exclude_weak_wifi", false);
+        sharedPref.registerOnSharedPreferenceChangeListener(prefListener);
+        Log.d("DisplayWifiScan2","excludeWeakWifi = "+excludeWeakWifi);
+
+        //tl.setGravity(Gravity.BOTTOM);
 //        gd=new GradientDrawable();
 //        gd.setStroke(1, Color.LTGRAY); //draws lines around the item, but when name goes to second line it draws a line between, but not always
 
@@ -115,50 +140,53 @@ public class DisplayWifiScan2 extends AppCompatActivity {
         size = size - 1;
         while (size >= 0)
         {
-            //TODO: on RCA tablet something blanks out a block from the header to the bottom overwriting part of the SSID after the intial draw, which looks ok. But ZTE Speed ok, maybe just a RCA tablet issue (it was cheap).
-            /** Create a TableRow dynamically **/
-            tr = new TableRow(this);
-            //tr.setBackground(gd);  // sometimes the second line of name is NOT part of the gradient, but sometimes it is.
-            // looks like I need to set background on each textView field.
+            int wifiStrength = WifiManager.calculateSignalLevel(results.get(size).level, 5);
+            if(!excludeWeakWifi || wifiStrength>0) {
+                //TODO: on RCA tablet something blanks out a block from the header to the bottom overwriting part of the SSID after the intial draw, which looks ok. But ZTE Speed ok, maybe just a RCA tablet issue (it was cheap).
+                //TODO: also noticed sporadically on the ZTE Speed when coming back from preference setting screen (but then it redraws properly at next refresh. I'm not sure the RCA tablet does a refresh.
+                /** Create a TableRow dynamically **/
+                tr = new TableRow(this);
+                //tr.setBackground(gd);  // sometimes the second line of name is NOT part of the gradient, but sometimes it is.
+                // looks like I need to set background on each textView field.
 
-            //tr.setGravity(Gravity.BOTTOM);  //TODO: doesn't seem to work, channel & strength don't line up great with 2 line name, but it's not bad.
+                //tr.setGravity(Gravity.BOTTOM);  //TODO: doesn't seem to work, channel & strength don't line up great with 2 line name, but it's not bad.
 
-            /** Creating a TextView to add to the row **/
-            SSID_TV = new TextView(this);
-            SSID_TV.setText(results.get(size).SSID);
-            SSID_TV.setTextColor(Color.BLACK);
-            SSID_TV.setTextSize(getResources().getDimension(R.dimen.myFontSize));
-            SSID_TV.setEllipsize(TextUtils.TruncateAt.END); //doesn't seem to work
-            SSID_TV.setTypeface(Typeface.DEFAULT);
-            SSID_TV.setPadding(5, 2, 5, 2);
-            SSID_TV.setBackground(gd);      // extra background set to cover names with 2 lines.
-            tr.addView(SSID_TV);  // Adding textView to tablerow.
+                /** Creating a TextView to add to the row **/
+                SSID_TV = new TextView(this);
+                SSID_TV.setText(results.get(size).SSID);
+                SSID_TV.setTextColor(Color.BLACK);
+                SSID_TV.setTextSize(getResources().getDimension(R.dimen.myFontSize));
+                SSID_TV.setEllipsize(TextUtils.TruncateAt.END); //doesn't seem to work
+                SSID_TV.setTypeface(Typeface.DEFAULT);
+                SSID_TV.setPadding(5, 2, 5, 2);
+                SSID_TV.setBackground(gd);      // extra background set to cover names with 2 lines.
+                tr.addView(SSID_TV);  // Adding textView to tablerow.
 
-            /** Creating another textview **/
-            channelTV = new TextView(this);
-            channelTV.setText(Integer.toString(convertFrequencyToChannel(results.get(size).frequency)));
-            channelTV.setTextColor(Color.BLACK);
-            channelTV.setTextSize(getResources().getDimension(R.dimen.myFontSize));
-            channelTV.setPadding(5, 2, 5, 2);
-            channelTV.setTypeface(Typeface.DEFAULT);
-            channelTV.setBackground(gd);
-            tr.addView(channelTV); // Adding textView to tablerow.
+                /** Creating another textview **/
+                channelTV = new TextView(this);
+                channelTV.setText(Integer.toString(convertFrequencyToChannel(results.get(size).frequency)));
+                channelTV.setTextColor(Color.BLACK);
+                channelTV.setTextSize(getResources().getDimension(R.dimen.myFontSize));
+                channelTV.setPadding(5, 2, 5, 2);
+                channelTV.setTypeface(Typeface.DEFAULT);
+                channelTV.setBackground(gd);
+                tr.addView(channelTV); // Adding textView to tablerow.
 
-            /** Creating another textview **/
-            strengthTV = new TextView(this);
-            strengthTV.setText(Integer.toString(WifiManager.calculateSignalLevel(results.get(size).level, 5)));
-            strengthTV.setTextColor(Color.BLACK);
-            strengthTV.setTextSize(getResources().getDimension(R.dimen.myFontSize));
-            strengthTV.setPadding(5, 2, 5, 2);
-            strengthTV.setTypeface(Typeface.DEFAULT);
-            strengthTV.setBackground(gd);
-            tr.addView(strengthTV); // Adding textView to tablerow.
+                /** Creating another textview **/
+                strengthTV = new TextView(this);
+                strengthTV.setText(Integer.toString(wifiStrength));
+                strengthTV.setTextColor(Color.BLACK);
+                strengthTV.setTextSize(getResources().getDimension(R.dimen.myFontSize));
+                strengthTV.setPadding(5, 2, 5, 2);
+                strengthTV.setTypeface(Typeface.DEFAULT);
+                strengthTV.setBackground(gd);
+                tr.addView(strengthTV); // Adding textView to tablerow.
 
-            // Add the TableRow to the TableLayout
-            tl.addView(tr, new TableLayout.LayoutParams(
-                    LayoutParams.MATCH_PARENT,
-                    LayoutParams.WRAP_CONTENT));
-
+                // Add the TableRow to the TableLayout
+                tl.addView(tr, new TableLayout.LayoutParams(
+                        LayoutParams.MATCH_PARENT,
+                        LayoutParams.WRAP_CONTENT));
+            }
             size--;
         }
         startDisplay = false;       // allow new wifi scan result
@@ -171,7 +199,7 @@ public class DisplayWifiScan2 extends AppCompatActivity {
         tr = new TableRow(this);
         //tr.setBackground(gd);
 
-        Log.d("DisplayWifiScan2", "r.dimen.myFontSize = " + getResources().getDimension(R.dimen.myFontSize));
+        //Log.d("DisplayWifiScan2", "r.dimen.myFontSize = " + getResources().getDimension(R.dimen.myFontSize));
 
         /** Creating a TextView to add to the row **/
         TextView SSID_TV = new TextView(this);
@@ -225,6 +253,8 @@ public class DisplayWifiScan2 extends AppCompatActivity {
 
         //noinspection SimplifiableIfStatement
         if (id == R.id.action_settings) {
+            Intent intent = new Intent(this, SettingsActivity.class);
+            startActivity(intent);
             return true;
         }
 
@@ -236,5 +266,16 @@ public class DisplayWifiScan2 extends AppCompatActivity {
         Log.d("DisplayWifiScan2", "onDestroy called");
         super.onDestroy();
         unregisterReceiver(myReceiver);
+        sharedPref.unregisterOnSharedPreferenceChangeListener(prefListener);
     }
+
+    // don't need this yet, gets called initially prior to first scan AND it is NOT called after prefernce screen goes away.
+//    @Override
+//    public void onResume(){
+//        super.onResume();
+//        // put your code here...
+//        tl.removeAllViews();    // clear table
+//        addHeaders();           // add table headers
+//        displayScan();          // add table rows
+//    }
 }

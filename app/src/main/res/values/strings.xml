@@ -16,4 +16,5 @@
     <string name="header_strength">Strength</string>
     <string name="button_wifi_scan2">WIFI networks scan (new)</string>
     <string name="title_activity_display_wifi_scan2">Wifi Scan</string>
+    <string name="title_activity_settings">3491 Scanner Settings</string>
 </resources>
