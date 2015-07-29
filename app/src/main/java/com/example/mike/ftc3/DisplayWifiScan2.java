@@ -7,7 +7,6 @@ import android.content.IntentFilter;
 import android.content.SharedPreferences;
 import android.graphics.Color;
 import android.graphics.Typeface;
-import android.graphics.drawable.GradientDrawable;
 import android.net.wifi.ScanResult;
 import android.net.wifi.WifiManager;
 import android.os.Bundle;
@@ -76,7 +75,7 @@ public class DisplayWifiScan2 extends AppCompatActivity {
 
     private TableLayout tl;
     private TableRow tr;
-    private GradientDrawable gd;
+    private TableRow trDivider;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -90,18 +89,6 @@ public class DisplayWifiScan2 extends AppCompatActivity {
         sharedPref.registerOnSharedPreferenceChangeListener(prefListener);
         Log.d("DisplayWifiScan2","excludeWeakWifi = "+excludeWeakWifi);
 
-        //tl.setGravity(Gravity.BOTTOM);
-//        gd=new GradientDrawable();
-//        gd.setStroke(1, Color.LTGRAY); //draws lines around the item, but when name goes to second line it draws a line between, but not always
-
-        gd = new GradientDrawable( // this draw a light grey gradient, white at top to light grey, but if name goes to two lines then each line gets a gradient, but not always
-                GradientDrawable.Orientation.TOP_BOTTOM,
-                new int[] {Color.parseColor("#FFFFFF"), Color.parseColor("#A0A0A0")});
-        //gd.setGradientType(GradientDrawable.LINEAR_GRADIENT); // default
-        //gd.setGradientCenter(0.f, 1.f); // requires type sweep or radial
-        //gd.setLevel(2);
-
-//        tl.setBackground(gd);  // this puts drawable on entire table, use rows instead.
         addHeaders();
 
         wifi = (WifiManager) getSystemService(Context.WIFI_SERVICE);
@@ -142,16 +129,10 @@ public class DisplayWifiScan2 extends AppCompatActivity {
         {
             int wifiStrength = WifiManager.calculateSignalLevel(results.get(size).level, 5);
             if(!excludeWeakWifi || wifiStrength>0) {
-                //TODO: on RCA tablet something blanks out a block from the header to the bottom overwriting part of the SSID after the intial draw, which looks ok. But ZTE Speed ok, maybe just a RCA tablet issue (it was cheap).
-                //TODO: also noticed sporadically on the ZTE Speed when coming back from preference setting screen (but then it redraws properly at next refresh. I'm not sure the RCA tablet does a refresh.
                 /** Create a TableRow dynamically **/
                 tr = new TableRow(this);
-                //tr.setBackground(gd);  // sometimes the second line of name is NOT part of the gradient, but sometimes it is.
-                // looks like I need to set background on each textView field.
 
-                //tr.setGravity(Gravity.BOTTOM);  //TODO: doesn't seem to work, channel & strength don't line up great with 2 line name, but it's not bad.
-
-                /** Creating a TextView to add to the row **/
+                 /** Creating a TextView to add to the row **/
                 SSID_TV = new TextView(this);
                 SSID_TV.setText(results.get(size).SSID);
                 SSID_TV.setTextColor(Color.BLACK);
@@ -159,8 +140,8 @@ public class DisplayWifiScan2 extends AppCompatActivity {
                 SSID_TV.setEllipsize(TextUtils.TruncateAt.END); //doesn't seem to work
                 SSID_TV.setTypeface(Typeface.DEFAULT);
                 SSID_TV.setPadding(5, 2, 5, 2);
-                SSID_TV.setBackground(gd);      // extra background set to cover names with 2 lines.
                 tr.addView(SSID_TV);  // Adding textView to tablerow.
+
 
                 /** Creating another textview **/
                 channelTV = new TextView(this);
@@ -169,7 +150,6 @@ public class DisplayWifiScan2 extends AppCompatActivity {
                 channelTV.setTextSize(getResources().getDimension(R.dimen.myFontSize));
                 channelTV.setPadding(5, 2, 5, 2);
                 channelTV.setTypeface(Typeface.DEFAULT);
-                channelTV.setBackground(gd);
                 tr.addView(channelTV); // Adding textView to tablerow.
 
                 /** Creating another textview **/
@@ -179,11 +159,18 @@ public class DisplayWifiScan2 extends AppCompatActivity {
                 strengthTV.setTextSize(getResources().getDimension(R.dimen.myFontSize));
                 strengthTV.setPadding(5, 2, 5, 2);
                 strengthTV.setTypeface(Typeface.DEFAULT);
-                strengthTV.setBackground(gd);
                 tr.addView(strengthTV); // Adding textView to tablerow.
 
                 // Add the TableRow to the TableLayout
                 tl.addView(tr, new TableLayout.LayoutParams(
+                        LayoutParams.MATCH_PARENT,
+                        LayoutParams.WRAP_CONTENT));
+
+                //add row divider
+                trDivider = new TableRow(this);
+                trDivider.setPadding(0, 0, 0, 1); //Border between rows
+                trDivider.setBackgroundColor(Color.LTGRAY);
+                tl.addView(trDivider, new TableLayout.LayoutParams( // add line between rows
                         LayoutParams.MATCH_PARENT,
                         LayoutParams.WRAP_CONTENT));
             }
@@ -208,7 +195,6 @@ public class DisplayWifiScan2 extends AppCompatActivity {
         SSID_TV.setTextSize(getResources().getDimension(R.dimen.myFontSize));
         SSID_TV.setTypeface(Typeface.DEFAULT, Typeface.BOLD);
         SSID_TV.setPadding(5, 5, 5, 5);
-        SSID_TV.setBackground(gd);
         tr.addView(SSID_TV);  // Adding textView to tablerow.
 
         /** Creating another textview **/
@@ -218,7 +204,6 @@ public class DisplayWifiScan2 extends AppCompatActivity {
         channelTV.setTextSize(getResources().getDimension(R.dimen.myFontSize));
         channelTV.setTypeface(Typeface.DEFAULT, Typeface.BOLD);
         channelTV.setPadding(5, 5, 5, 5);
-        channelTV.setBackground(gd);
         tr.addView(channelTV); // Adding textView to tablerow.
 
         /** Creating another textview **/
@@ -228,11 +213,18 @@ public class DisplayWifiScan2 extends AppCompatActivity {
         strengthTV.setTextSize(getResources().getDimension(R.dimen.myFontSize));
         strengthTV.setTypeface(Typeface.DEFAULT, Typeface.BOLD);
         strengthTV.setPadding(5, 5, 5, 5);
-        strengthTV.setBackground(gd);
         tr.addView(strengthTV); // Adding textView to tablerow.
 
         // Add the TableRow to the TableLayout
         tl.addView(tr, new TableLayout.LayoutParams(
+                LayoutParams.MATCH_PARENT,
+                LayoutParams.WRAP_CONTENT));
+
+        //add row divider
+        trDivider = new TableRow(this);
+        trDivider.setPadding(0, 0, 0, 1); //Border between rows
+        trDivider.setBackgroundColor(Color.LTGRAY);
+        tl.addView(trDivider, new TableLayout.LayoutParams(
                 LayoutParams.MATCH_PARENT,
                 LayoutParams.WRAP_CONTENT));
     }

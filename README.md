@@ -5,8 +5,10 @@ This app has various screens to display all Wifi networks, what Wifi channels th
 It currently has four display screens:
 - The first screen lists all Wifi networks with the channel number they're using in descending strength.
 - The second screen shows a graphic display of what networks are using what channel and how strong they are showing overlapping usage as half oval shapes.
-- The third screen shows a graphic display of what networks are using what channel as boxes, how strong they are, and how they overlap if they do. Strong networks are red, then purple, yellow and green as they get weaker. The weakest networks are excluded.
+- The third screen shows a graphic display of what networks are using what channel as boxes, how strong they are, and how they overlap if they do. Strong networks are red, then purple, yellow and green as they get weaker.
 - The fourth screen is the same as one, but Wifi Network names don't truncate. Switched to a TableLayout view with shrinkable name column. Also respects user Display font size preferences.
+
+A Settings screen was added that allows user to choose whether or not to exclude weak wifi networks, and change the orientation of how screen three draws.
 
 Screen 1
 
@@ -23,7 +25,7 @@ Screen 3
 
 Screen 4
 
-![Screen 4 image](doc/device-2015-07-01-104243.png "Screen 4 - Wifi networks channel and strength")
+![Screen 4 image](doc/device-2015-07-29-144842.png "Screen 4 - Wifi networks channel and strength")
 
 Settings Screen
 
@@ -45,3 +47,4 @@ Change History:
 - v0.6 added fourth screen, a better looking Wifi networks list that adjusts to user's screens and preferences.
 - v0.7 changed 3rd screen to not angle names in boxes, but print either horizontally or vertically.
 - v0.8 added a Settings screen and options to exclude weak wifi networks and change orientation for screen 3
+- v0.9 had issue with screen 4 gradients not always drawing properly on different devices. Removed gradients, inserted divider rows instead, which looks better when the SSID field needs more than one row.
