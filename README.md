@@ -20,12 +20,12 @@ Screen 2
 
 Screen 3
 
-![Screen 3 image](doc/device-2015-07-07-082221.png "Screen 3 - Wifi networks as boxes")
+![Screen 3 image](doc/device-2015-08-05-131205.png "Screen 3 - Wifi networks as boxes")
 ![Screen 3 horizontal image](doc/device-2015-07-07-082042.png "Screen 3 - horizontal")
 
 Screen 4
 
-![Screen 4 image](doc/device-2015-07-29-144842.png "Screen 4 - Wifi networks channel and strength")
+![Screen 4 image](doc/device-2015-08-05-130759.png "Screen 4 - Wifi networks channel and strength")
 
 Settings Screen
 
@@ -48,3 +48,4 @@ Change History:
 - v0.7 changed 3rd screen to not angle names in boxes, but print either horizontally or vertically.
 - v0.8 added a Settings screen and options to exclude weak wifi networks and change orientation for screen 3
 - v0.9 had issue with screen 4 gradients not always drawing properly on different devices. Removed gradients, inserted divider rows instead, which looks better when the SSID field needs more than one row.
+- v0.10 display network BSSID if SSID is an empty string on screen 3 and 4. On screen 3, fit strong networks on screen by dropping weak networks if needed.

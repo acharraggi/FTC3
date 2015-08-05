@@ -134,7 +134,7 @@ public class DisplayWifiScan2 extends AppCompatActivity {
 
                  /** Creating a TextView to add to the row **/
                 SSID_TV = new TextView(this);
-                SSID_TV.setText(results.get(size).SSID);
+                SSID_TV.setText(results.get(size).SSID.isEmpty() ? results.get(size).BSSID : results.get(size).SSID);
                 SSID_TV.setTextColor(Color.BLACK);
                 SSID_TV.setTextSize(getResources().getDimension(R.dimen.myFontSize));
                 SSID_TV.setEllipsize(TextUtils.TruncateAt.END); //doesn't seem to work
@@ -190,7 +190,7 @@ public class DisplayWifiScan2 extends AppCompatActivity {
 
         /** Creating a TextView to add to the row **/
         TextView SSID_TV = new TextView(this);
-        SSID_TV.setText("Network (SSID)");
+        SSID_TV.setText("Network");
         SSID_TV.setTextColor(Color.BLACK);
         SSID_TV.setTextSize(getResources().getDimension(R.dimen.myFontSize));
         SSID_TV.setTypeface(Typeface.DEFAULT, Typeface.BOLD);
