@@ -23,22 +23,6 @@
             </intent-filter>
         </activity>
         <activity
-            android:name="com.example.mike.FTCScanner.DisplayWifiScan"
-            android:label="@string/title_activity_display_wifi_scan"
-            android:parentActivityName="com.example.mike.FTCScanner.MainActivity" >
-            <meta-data
-                android:name="android.support.PARENT_ACTIVITY"
-                android:value="com.example.mike.FTCScanner.MainActivity" />
-        </activity>
-        <activity
-            android:name="com.example.mike.FTCScanner.DisplayChannelScan"
-            android:label="@string/title_activity_display_channel_scan"
-            android:parentActivityName="com.example.mike.FTCScanner.MainActivity" >
-            <meta-data
-                android:name="android.support.PARENT_ACTIVITY"
-                android:value="com.example.mike.FTCScanner.MainActivity" />
-        </activity>
-        <activity
             android:name="com.example.mike.FTCScanner.DisplayChannelScan2"
             android:label="@string/title_activity_display_channel_scan2"
             android:parentActivityName="com.example.mike.FTCScanner.MainActivity" >

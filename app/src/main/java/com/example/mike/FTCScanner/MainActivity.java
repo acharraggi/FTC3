@@ -12,24 +12,10 @@ import android.view.View;
 
 public class MainActivity extends AppCompatActivity {
 
-    /** Called when the user clicks the wifi scan button */
-    public void displayWifiScan(View view) {
-        // Do something in response to button
-        Intent intent = new Intent(this, DisplayWifiScan.class);
-        startActivity(intent);
-    }
-
     /** Called when the user clicks the new wifi scan button */
     public void displayWifiScan2(View view) {
         // Do something in response to button
         Intent intent = new Intent(this, DisplayWifiScan2.class);
-        startActivity(intent);
-    }
-
-    /** Called when the user clicks the channel scan button */
-    public void displayChannelScan(View view) {
-        // Do something in response to button
-        Intent intent = new Intent(this, DisplayChannelScan.class);
         startActivity(intent);
     }
 
