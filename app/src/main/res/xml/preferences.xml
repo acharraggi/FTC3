@@ -1,7 +1,7 @@
 <?xml version="1.0" encoding="utf-8"?>
 <PreferenceScreen xmlns:android="http://schemas.android.com/apk/res/android">
     <PreferenceCategory
-        android:title="3491 Scanner Preferences"
+        android:title="@string/title_activity_settings"
         android:key="first_category">
 
     <CheckBoxPreference
@@ -17,6 +17,13 @@
         android:title="Vertical Orientation"
         android:defaultValue="true"
         />
+
+        <CheckBoxPreference
+            android:key="exclude_robots"
+            android:summary="Exclude FTC robots following the naming convention?"
+            android:title="Exclude Robots"
+            android:defaultValue="false"
+            />
 
     </PreferenceCategory>
 </PreferenceScreen>

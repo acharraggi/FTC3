@@ -1,4 +1,4 @@
-package com.example.mike.ftc3;
+package com.example.mike.FTCScanner;
 
 import android.os.Bundle;
 import android.preference.PreferenceFragment;

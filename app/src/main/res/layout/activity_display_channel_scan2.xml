@@ -4,6 +4,6 @@
     android:layout_width="match_parent"
     android:layout_height="match_parent"
     android:id="@+id/channel_scan2"
-    tools:context="com.example.mike.ftc3.DisplayChannelScan2">
+    tools:context="com.example.mike.FTCScanner.DisplayChannelScan2">
 
 </LinearLayout>

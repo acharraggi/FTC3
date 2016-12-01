@@ -1,4 +1,4 @@
-package com.example.mike.ftc3;
+package com.example.mike.FTCScanner;
 
 import android.content.Intent;
 //import android.support.v7.app.ActionBarActivity;

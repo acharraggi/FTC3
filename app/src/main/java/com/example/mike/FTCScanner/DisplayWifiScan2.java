@@ -1,4 +1,4 @@
-package com.example.mike.ftc3;
+package com.example.mike.FTCScanner;
 
 import android.content.BroadcastReceiver;
 import android.content.Context;
@@ -34,6 +34,7 @@ public class DisplayWifiScan2 extends AppCompatActivity {
 
     // preference variables
     private volatile Boolean excludeWeakWifi = true;
+    private volatile Boolean excludeRobots = true;
     private SharedPreferences sharedPref;
     private final SharedPreferences.OnSharedPreferenceChangeListener prefListener =
             new SharedPreferences.OnSharedPreferenceChangeListener() {
@@ -44,6 +45,13 @@ public class DisplayWifiScan2 extends AppCompatActivity {
                         boolean newValue=prefs.getBoolean("exclude_weak_wifi", false);
                         if(newValue != excludeWeakWifi) {
                             excludeWeakWifi = newValue;
+                            wifiScan();  //rescan
+                        }
+                    }
+                    if (key.equals("exclude_robots")) {
+                        boolean newValue=prefs.getBoolean("exclude_robots", false);
+                        if(newValue != excludeRobots) {
+                            excludeRobots = newValue;
                             wifiScan();  //rescan
                         }
                     }
@@ -86,8 +94,10 @@ public class DisplayWifiScan2 extends AppCompatActivity {
 
         sharedPref = PreferenceManager.getDefaultSharedPreferences(this);
         excludeWeakWifi = sharedPref.getBoolean("exclude_weak_wifi", false);
+        excludeRobots = sharedPref.getBoolean("exclude_robots", false);
         sharedPref.registerOnSharedPreferenceChangeListener(prefListener);
         Log.d("DisplayWifiScan2","excludeWeakWifi = "+excludeWeakWifi);
+        Log.d("DisplayWifiScan2","excludeRobots = "+excludeRobots);
 
         addHeaders();
 
@@ -128,13 +138,18 @@ public class DisplayWifiScan2 extends AppCompatActivity {
         while (size >= 0)
         {
             int wifiStrength = WifiManager.calculateSignalLevel(results.get(size).level, 5);
-            if(!excludeWeakWifi || wifiStrength>0) {
+            String ssid_name = results.get(size).SSID.isEmpty() ? results.get(size).BSSID : results.get(size).SSID;
+            Log.d("displayScan","ssid_name = "+ssid_name);
+
+            if( (!excludeWeakWifi || wifiStrength>0)   &&             // if exclude weak wifi is on and signle is weak, this expresss is false
+                  (!excludeRobots || !ssid_name.toUpperCase().contains("SHAW") )  //
+                    ) {
                 /** Create a TableRow dynamically **/
                 tr = new TableRow(this);
 
                  /** Creating a TextView to add to the row **/
                 SSID_TV = new TextView(this);
-                SSID_TV.setText(results.get(size).SSID.isEmpty() ? results.get(size).BSSID : results.get(size).SSID);
+                SSID_TV.setText(ssid_name);
                 SSID_TV.setTextColor(Color.BLACK);
                 SSID_TV.setTextSize(getResources().getDimension(R.dimen.myFontSize));
                 SSID_TV.setEllipsize(TextUtils.TruncateAt.END); //doesn't seem to work

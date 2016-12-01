@@ -1,5 +1,5 @@
 # ftc3
-## 3491 Scanner
+## FTC Scanner
 This app has various screens to display all Wifi networks, what Wifi channels they're using, and signal strengths.
 
 It currently has four display screens:
@@ -49,3 +49,4 @@ Change History:
 - v0.8 added a Settings screen and options to exclude weak wifi networks and change orientation for screen 3
 - v0.9 had issue with screen 4 gradients not always drawing properly on different devices. Removed gradients, inserted divider rows instead, which looks better when the SSID field needs more than one row.
 - v0.10 display network BSSID if SSID is an empty string on screen 3 and 4. On screen 3, fit strong networks on screen by dropping weak networks if needed.
+- v0.11 gradle upgrade, rename app to FTC Scanner, enable filtering to exclude FTC robot controllers

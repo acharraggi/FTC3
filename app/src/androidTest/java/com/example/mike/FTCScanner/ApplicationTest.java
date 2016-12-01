@@ -1,4 +1,4 @@
-package com.example.mike.ftc3;
+package com.example.mike.FTCScanner;
 
 import android.app.Application;
 import android.test.ApplicationTestCase;

@@ -1,4 +1,4 @@
-package com.example.mike.ftc3;
+package com.example.mike.FTCScanner;
 
 import android.content.BroadcastReceiver;
 import android.content.Context;
@@ -38,6 +38,7 @@ public class DisplayChannelScan2 extends AppCompatActivity {
 
     // preference variables
     private Boolean excludeWeakWifi = true;
+    private volatile Boolean excludeRobots = true;
     private Boolean isVertical = true;
     private SharedPreferences sharedPref;
     private final SharedPreferences.OnSharedPreferenceChangeListener prefListener =
@@ -56,6 +57,13 @@ public class DisplayChannelScan2 extends AppCompatActivity {
                         boolean newValue=prefs.getBoolean("is_vertical", false);
                         if(newValue != isVertical) {
                             isVertical = newValue;
+                            wifiScan();  //rescan
+                        }
+                    }
+                    if (key.equals("exclude_robots")) {
+                        boolean newValue=prefs.getBoolean("exclude_robots", false);
+                        if(newValue != excludeRobots) {
+                            excludeRobots = newValue;
                             wifiScan();  //rescan
                         }
                     }
@@ -82,7 +90,8 @@ public class DisplayChannelScan2 extends AppCompatActivity {
                 if(excludeWeakWifi) {
                     signalTest = 0;
                 }
-                if (channel > 0 && channel < 14 && signalLevel > signalTest) {
+                if ((channel > 0 && channel < 14 && signalLevel > signalTest) &&
+                    (!excludeRobots || !isFTCrobot(r.SSID))) {
                     channelTotal[channel] += convertLevelToStrength(r.level) * 2;
                 }
                 else { // ignore unexpected frequencies. optionally ignore weak signals.
@@ -126,6 +135,17 @@ public class DisplayChannelScan2 extends AppCompatActivity {
         }
     };
 
+    private static boolean isFTCrobot(String ssid_name) {
+        // examine SSID and see if it matches the FTC robot naming convention
+        // Robot Name: 12345-RC or 12345-B-RC, where B, can be any letter.
+        // WiFi Direct adds a prefix of DIRECT-xx- where xx is any two uppercase letters
+        // eg. DIRECT-XJ-3491-C-RC
+        if(ssid_name.matches("^DIRECT-[a-zA-Z]{1,2}-[0-9]{1,5}(-[A-Z])??-((DS)|(RC))$")) {
+                return true;
+        }
+        return false;
+    }
+
     private boolean mMeasured = false;
     private int llWidth = 0;
     private int llHeight = 0;
@@ -140,9 +160,10 @@ public class DisplayChannelScan2 extends AppCompatActivity {
 
         sharedPref = PreferenceManager.getDefaultSharedPreferences(this);
         excludeWeakWifi = sharedPref.getBoolean("exclude_weak_wifi", true);
+        excludeRobots = sharedPref.getBoolean("exclude_robots", false);
         isVertical = sharedPref.getBoolean("is_vertical", true);
         sharedPref.registerOnSharedPreferenceChangeListener(prefListener);
-        Log.d("DisplayWifiScan2", "excludeWeakWifi = " + excludeWeakWifi + ", isVertical = " + isVertical);
+        Log.d("DisplayWifiScan2", "excludeWeakWifi = " + excludeWeakWifi + ", isVertical = " + isVertical + ", excludeRobots = " + excludeRobots);
 
         ll.getViewTreeObserver().addOnGlobalLayoutListener(new ViewTreeObserver.OnGlobalLayoutListener() {
             @Override
