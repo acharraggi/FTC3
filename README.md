@@ -1,5 +1,4 @@
-# ftc3
-## FTC Scanner
+# FTC Scanner
 This app has various screens to display all Wifi networks, what Wifi channels they're using, and signal strengths. Now includes filtering of FTC Robot Controllers making it easy to tell what other WiFi networks are running in that location.
 
 It currently has two display screens:
